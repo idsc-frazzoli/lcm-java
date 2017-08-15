@@ -34,12 +34,14 @@ public final class LCMDataOutputStream implements DataOutput {
     }
   }
 
+  @Override
   public void write(byte b[]) {
     ensureSpace(b.length);
     System.arraycopy(b, 0, buf, pos, b.length);
     pos += b.length;
   }
 
+  @Override
   public void write(byte b[], int off, int len) {
     ensureSpace(len);
     System.arraycopy(b, off, buf, pos, len);
@@ -53,21 +55,25 @@ public final class LCMDataOutputStream implements DataOutput {
       write(c[i]);
   }
 
+  @Override
   public void write(int b) {
     ensureSpace(1);
     buf[pos++] = (byte) b;
   }
 
+  @Override
   public void writeBoolean(boolean v) {
     ensureSpace(1);
     buf[pos++] = v ? (byte) 1 : (byte) 0;
   }
 
+  @Override
   public void writeByte(int v) {
     ensureSpace(1);
     buf[pos++] = (byte) v;
   }
 
+  @Override
   public void writeBytes(String s) {
     ensureSpace(s.length());
     for (int i = 0; i < s.length(); i++) {
@@ -75,10 +81,12 @@ public final class LCMDataOutputStream implements DataOutput {
     }
   }
 
+  @Override
   public void writeChar(int v) {
     writeShort(v);
   }
 
+  @Override
   public void writeChars(String s) {
     ensureSpace(2 * s.length());
     for (int i = 0; i < s.length(); i++) {
@@ -97,14 +105,17 @@ public final class LCMDataOutputStream implements DataOutput {
     buf[pos++] = 0;
   }
 
+  @Override
   public void writeDouble(double v) {
     writeLong(Double.doubleToLongBits(v));
   }
 
+  @Override
   public void writeFloat(float v) {
     writeInt(Float.floatToIntBits(v));
   }
 
+  @Override
   public void writeInt(int v) {
     ensureSpace(4);
     buf[pos++] = (byte) (v >>> 24);
@@ -113,6 +124,7 @@ public final class LCMDataOutputStream implements DataOutput {
     buf[pos++] = (byte) (v >>> 0);
   }
 
+  @Override
   public void writeLong(long v) {
     ensureSpace(8);
     buf[pos++] = (byte) (v >>> 56);
@@ -125,12 +137,14 @@ public final class LCMDataOutputStream implements DataOutput {
     buf[pos++] = (byte) (v >>> 0);
   }
 
+  @Override
   public void writeShort(int v) {
     ensureSpace(2);
     buf[pos++] = (byte) (v >>> 8);
     buf[pos++] = (byte) (v >>> 0);
   }
 
+  @Override
   public void writeUTF(String s) {
     assert (false);
   }

@@ -80,6 +80,7 @@ public class Spy {
     thread = new HzThread();
     thread.start();
     clearButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         channelMap.clear();
         channelList.clear();
@@ -87,6 +88,7 @@ public class Spy {
       }
     });
     channelTable.addMouseListener(new MouseAdapter() {
+      @Override
       @SuppressWarnings("unused")
       public void mouseClicked(MouseEvent e) {
         int mods = e.getModifiersEx();
@@ -110,6 +112,7 @@ public class Spy {
       }
     });
     jif.addWindowListener(new WindowAdapter() {
+      @Override
       public void windowClosing(WindowEvent e) {
         System.out.println("Spy quitting");
         close(); // Added by Jen
@@ -150,7 +153,6 @@ public class Spy {
       return new PluginStarterAction();
     }
 
-    @SuppressWarnings("serial")
     class PluginStarterAction extends AbstractAction {
       public PluginStarterAction() {
         super(name);
@@ -174,6 +176,7 @@ public class Spy {
   }
 
   class PluginClassVisitor implements ClassDiscoverer.ClassVisitor {
+    @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void classFound(String jar, Class cls) {
       Class interfaces[] = cls.getInterfaces();
@@ -224,16 +227,18 @@ public class Spy {
     return System.nanoTime() / 1000;
   }
 
-  @SuppressWarnings("serial")
   class ChannelTableModel extends AbstractTableModel {
+    @Override
     public int getColumnCount() {
       return 8;
     }
 
+    @Override
     public int getRowCount() {
       return channelList.size();
     }
 
+    @Override
     public Object getValueAt(int row, int col) {
       ChannelData cd = channelList.get(row);
       if (cd == null)
@@ -258,10 +263,12 @@ public class Spy {
         return String.format("%6.2f KB/s", (cd.bandwidth / 1024.0));
       case 7:
         return "" + cd.nerrors;
+      default:
+        return "???";
       }
-      return "???";
     }
 
+    @Override
     public String getColumnName(int col) {
       switch (col) {
       case 0:
@@ -280,12 +287,14 @@ public class Spy {
         return "Bandwidth";
       case 7:
         return "Undecodable";
+      default:
+        return "???";
       }
-      return "???";
     }
   }
 
   class MySubscriber implements LCMSubscriber {
+    @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void messageReceived(LCM lcm, String channel, LCMDataInputStream dins) {
       Object o = null;
@@ -352,6 +361,7 @@ public class Spy {
       setName("LCM-Spy"); // Modified by Jen
     }
 
+    @Override
     public void run() {
       while (!isInterrupted()) {
         long utime = utime_now();
@@ -383,7 +393,6 @@ public class Spy {
     }
   }
 
-  @SuppressWarnings("serial")
   class DefaultViewer extends AbstractAction {
     ChannelData cd;
 
@@ -392,6 +401,7 @@ public class Spy {
       this.cd = cd;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       createViewer(cd);
     }

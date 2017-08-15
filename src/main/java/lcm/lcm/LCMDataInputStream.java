@@ -40,56 +40,67 @@ public final class LCMDataInputStream implements DataInput {
     pos = startpos;
   }
 
+  @Override
   public boolean readBoolean() throws IOException {
     needInput(1);
     return (buf[pos++] != 0);
   }
 
+  @Override
   public byte readByte() throws IOException {
     needInput(1);
     return buf[pos++];
   }
 
+  @Override
   public int readUnsignedByte() throws IOException {
     needInput(1);
     return buf[pos++] & 0xff;
   }
 
+  @Override
   public char readChar() throws IOException {
     return (char) readShort();
   }
 
+  @Override
   public short readShort() throws IOException {
     needInput(2);
     return (short) (((buf[pos++] & 0xff) << 8) | ((buf[pos++] & 0xff) << 0));
   }
 
+  @Override
   public int readUnsignedShort() throws IOException {
     needInput(2);
     return ((buf[pos++] & 0xff) << 8) | ((buf[pos++] & 0xff) << 0);
   }
 
+  @Override
   public int readInt() throws IOException {
     needInput(4);
     return ((buf[pos++] & 0xff) << 24) | ((buf[pos++] & 0xff) << 16) | ((buf[pos++] & 0xff) << 8) | ((buf[pos++] & 0xff) << 0);
   }
 
+  @Override
   public long readLong() throws IOException {
     needInput(8);
     return ((buf[pos++] & 0xffL) << 56) | ((buf[pos++] & 0xffL) << 48) | ((buf[pos++] & 0xffL) << 40) | ((buf[pos++] & 0xffL) << 32)
         | ((buf[pos++] & 0xffL) << 24) | ((buf[pos++] & 0xffL) << 16) | ((buf[pos++] & 0xffL) << 8) | ((buf[pos++] & 0xffL) << 0);
   }
 
+  @Override
   public float readFloat() throws IOException {
     return Float.intBitsToFloat(readInt());
   }
 
+  @Override
   public void readFully(byte b[]) throws IOException {
     needInput(b.length);
     System.arraycopy(buf, pos, b, 0, b.length);
     pos += b.length;
   }
 
+  @Override
   public void readFully(byte b[], int off, int len) throws IOException {
     needInput(len);
     System.arraycopy(buf, pos, b, off, len);
@@ -103,10 +114,12 @@ public final class LCMDataInputStream implements DataInput {
       c[i] = (char) (buf[pos++] & 0xff);
   }
 
+  @Override
   public double readDouble() throws IOException {
     return Double.longBitsToDouble(readLong());
   }
 
+  @Override
   public String readLine() throws IOException {
     StringBuffer sb = new StringBuffer();
     while (true) {
@@ -132,11 +145,13 @@ public final class LCMDataInputStream implements DataInput {
     return sb.toString();
   }
 
+  @Override
   public String readUTF() throws IOException {
     assert (false);
     return null;
   }
 
+  @Override
   public int skipBytes(int n) {
     pos += n;
     return n;

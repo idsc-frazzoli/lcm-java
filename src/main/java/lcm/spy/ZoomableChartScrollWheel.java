@@ -27,7 +27,6 @@ import info.monitorenter.gui.chart.labelformatters.LabelFormatterNumber;
 import info.monitorenter.gui.chart.traces.Trace2DLtd;
 
 /** Chart that supports panning and zooming in the Google-maps style. */
-@SuppressWarnings("serial")
 public class ZoomableChartScrollWheel extends ZoomableChart {
   private double mouseDownStartX, mouseDownStartY, mouseDownValPerPxX, mouseDownMinX, mouseDownMaxX;
   private ArrayList<Double> mouseDownValPerPxY = new ArrayList<Double>();
@@ -88,6 +87,7 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
     content.add(newChart);
     newChart.addFrameFocusTimer(frame);
     frame.addWindowListener(new WindowAdapter() {
+      @Override
       public void windowClosing(WindowEvent e) {
         for (ITrace2D trace : newChart.getTraces()) {
           ((Trace2DLtd) trace).setMaxSize(chartData.sparklineChartSize);
@@ -152,6 +152,7 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
           // this trace is in the extra Y axis area
           JMenuItem newItem = new JMenuItem("    to main axis");
           newItem.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
               ZoomableChartScrollWheel.this.removeAxisYRight(axis);
               ZoomableChartScrollWheel.this.removeTrace(trace);
@@ -172,6 +173,7 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
           newItem.setEnabled(false);
         }
         newItem.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             AxisLinear newAxis = new AxisLinear();
             ZoomableChartScrollWheel.this.removeTrace(trace);
@@ -184,6 +186,7 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
       }
       JMenuItem moveWindowItem = new JMenuItem("    move to new window");
       moveWindowItem.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           for (AAxis axisL : rightYAxis) {
             if (axisL.getTraces().contains(trace)) {
@@ -198,6 +201,7 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
       });
       JMenuItem delItem = new JMenuItem("    remove");
       delItem.addActionListener(new ActionListener() {
+        @Override
         public void actionPerformed(ActionEvent e) {
           for (AAxis axisL : rightYAxis) {
             if (axisL.getTraces().contains(trace)) {
@@ -226,11 +230,13 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
     }
   }
 
+  @Override
   public void addAxisYRight(AAxis<?> axisY) {
     super.addAxisYRight(axisY);
     rightYAxis.add(axisY);
   }
 
+  @Override
   public boolean removeAxisYRight(IAxis<?> axisY) {
     rightYAxis.remove(axisY);
     return super.removeAxisYRight(axisY);
@@ -257,10 +263,12 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
   public void addFrameFocusTimer(JFrame frame) {
     this.frame = frame;
     this.frame.addWindowFocusListener(new WindowFocusListener() {
+      @Override
       public void windowGainedFocus(WindowEvent we) {
         lastFocusTime = System.nanoTime() / 1000;
       }
 
+      @Override
       public void windowLostFocus(WindowEvent we) {
         lastFocusTime = System.nanoTime() / 1000;
       }
@@ -275,6 +283,7 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
   }
 
   /** Handle mouse press events */
+  @Override
   @SuppressWarnings("rawtypes")
   public void mousePressed(MouseEvent e) {
     if (maybeShowPopup(e)) {
@@ -306,6 +315,7 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
   }
 
   /** Pan the chart when the mouse is dragged. */
+  @Override
   public void mouseDragged(MouseEvent e) {
     // move the view
     if ((e.getModifiersEx() & MouseEvent.BUTTON3_DOWN_MASK) != MouseEvent.BUTTON3_DOWN_MASK) {
@@ -314,6 +324,7 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
   }
 
   /** Handle mouse release events, including double-click and right click. */
+  @Override
   public void mouseReleased(MouseEvent e) {
     if (e.getClickCount() == 2) {
       this.zoomAll();

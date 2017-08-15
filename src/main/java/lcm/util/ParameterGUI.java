@@ -51,14 +51,17 @@ public class ParameterGUI {
       this.jtf = jtf;
     }
 
+    @Override
     public void keyPressed(KeyEvent e) {
       jtf.setBackground(Color.yellow);
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       jtf.setBackground(Color.white);
     }
 
+    @Override
     public void caretUpdate(CaretEvent e) {
     }
   }
@@ -101,6 +104,7 @@ public class ParameterGUI {
       this.name = name;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       notifyListeners(name);
     }
@@ -119,6 +123,7 @@ public class ParameterGUI {
       if (jcb == null) {
         jcb = new JCheckBox(desc, value);
         jcb.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             setBooleanValue(jcb.isSelected());
           }
@@ -138,6 +143,7 @@ public class ParameterGUI {
       notifyListeners(name);
     }
 
+    @Override
     void setEnabled(boolean v) {
       jcb.setEnabled(v);
     }
@@ -161,6 +167,7 @@ public class ParameterGUI {
       if (slider == null) {
         slider = new JSlider(min, max, value);
         slider.addChangeListener(new ChangeListener() {
+          @Override
           public void stateChanged(ChangeEvent e) {
             setIntegerValue(slider.getValue());
           }
@@ -180,6 +187,7 @@ public class ParameterGUI {
         textField = new JTextField("" + value);
         setupJTextField(textField);
         textField.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             setIntegerValue(parseInteger(textField.getText(), value));
           }
@@ -218,6 +226,7 @@ public class ParameterGUI {
       }
     }
 
+    @Override
     void setEnabled(boolean v) {
       if (slider != null)
         slider.setEnabled(v);
@@ -256,6 +265,7 @@ public class ParameterGUI {
       if (slider == null) {
         slider = new JSlider(0, SLIDER_CLICKS, ivalue);
         slider.addChangeListener(new ChangeListener() {
+          @Override
           public void stateChanged(ChangeEvent e) {
             setDoubleValue(((double) slider.getValue() + .5) / SLIDER_CLICKS * (max - min) + min);
           }
@@ -275,6 +285,7 @@ public class ParameterGUI {
         textField = new JTextField("" + value);
         setupJTextField(textField);
         textField.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             setDoubleValue(parseDouble(textField.getText(), value));
           }
@@ -317,6 +328,7 @@ public class ParameterGUI {
       updateSliderValue();
     }
 
+    @Override
     void setEnabled(boolean v) {
       if (slider != null)
         slider.setEnabled(v);
@@ -345,6 +357,7 @@ public class ParameterGUI {
         textField = new JTextField(value);
         setupJTextField(textField);
         textField.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             String v = textField.getText();
             setStringValue(v);
@@ -360,6 +373,7 @@ public class ParameterGUI {
       if (comboBox == null) {
         comboBox = new JComboBox(values);
         comboBox.addActionListener(new ActionListener() {
+          @Override
           public void actionPerformed(ActionEvent e) {
             setStringValue(values[comboBox.getSelectedIndex()]);
           }
@@ -397,6 +411,7 @@ public class ParameterGUI {
       notifyListeners(name);
     }
 
+    @Override
     void setEnabled(boolean v) {
       if (textField != null)
         textField.setEnabled(v);
@@ -697,6 +712,7 @@ public class ParameterGUI {
     pg.addButtons("Buttons", "button one", "button2", "button two", "button3", "button three");
     pg.addCheckBoxes("name1", "Checkbox 1", true, "name2", "Checkbox 2", false);
     pg.addListener(new ParameterListener() {
+      @Override
       public void parameterChanged(String name) {
         System.out.println("Changed " + name);
       }

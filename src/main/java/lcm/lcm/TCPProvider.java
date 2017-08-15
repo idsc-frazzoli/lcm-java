@@ -55,6 +55,7 @@ public class TCPProvider implements Provider {
 
   /** Publish a message synchronously. However, if the server is not available,
    * it will return immediately. **/
+  @Override
   public synchronized void publish(String channel, byte data[], int offset, int length) {
     try {
       publishEx(channel, data, offset, length);
@@ -78,16 +79,19 @@ public class TCPProvider implements Provider {
    * OutputStream sockOuts = tcp.getOutputStream(); if (sockOuts != null) {
    * try { sockOuts.write(b); sockOuts.flush(); } catch (IOException ex) { } }
    * } */
+  @Override
   public synchronized void subscribe(String channel) {
     subscriptions.add(channel);
     tcp.sendSubscribe(channel);
   }
 
+  @Override
   public synchronized void unsubscribe(String channel) {
     subscriptions.remove(channel);
     tcp.sendUnsubscribe(channel);
   }
 
+  @Override
   public synchronized void close() {
     if (null != tcp) {
       tcp.close();
@@ -108,7 +112,7 @@ public class TCPProvider implements Provider {
 
   void publishEx(String channel, byte data[], int offset, int length) throws Exception {
     byte[] channel_bytes = stringToBytes(channel);
-    int payload_size = channel_bytes.length + length;
+    // int payload_size = channel_bytes.length + length; // jph comment line because unused
     ByteArrayOutputStream bouts = new ByteArrayOutputStream(length + channel.length() + 32);
     DataOutputStream outs = new DataOutputStream(bouts);
     outs.writeInt(MESSAGE_TYPE_PUBLISH);
@@ -167,6 +171,7 @@ public class TCPProvider implements Provider {
       }
     }
 
+    @Override
     public void run() {
       while (!exit) {
         synchronized (this) {

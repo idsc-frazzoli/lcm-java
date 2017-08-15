@@ -53,6 +53,7 @@ public class UDPMulticastProvider implements Provider {
     sock.joinGroup(inetAddr);
   }
 
+  @Override
   public synchronized void publish(String channel, byte data[], int offset, int length) {
     try {
       publishEx(channel, data, offset, length);
@@ -61,6 +62,7 @@ public class UDPMulticastProvider implements Provider {
     }
   }
 
+  @Override
   public synchronized void subscribe(String channel) {
     if (null == reader) {
       reader = new ReaderThread();
@@ -68,9 +70,11 @@ public class UDPMulticastProvider implements Provider {
     }
   }
 
+  @Override
   public void unsubscribe(String channel) {
   }
 
+  @Override
   public synchronized void close() {
     if (null != reader) {
       reader.interrupt();
@@ -166,6 +170,7 @@ public class UDPMulticastProvider implements Provider {
       setName("LCM-UDP"); // Added by Jen
     }
 
+    @Override
     public void run() {
       DatagramPacket packet = new DatagramPacket(new byte[65536], 65536);
       while (!isInterrupted()) {

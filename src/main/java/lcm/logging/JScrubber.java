@@ -16,7 +16,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.event.MouseInputAdapter;
 
-@SuppressWarnings("serial")
 public class JScrubber extends JComponent {
   static final int BARHEIGHT = 5;
   static final int KNOBSIZE = 10;
@@ -93,6 +92,7 @@ public class JScrubber extends JComponent {
       super("Export log snippet...");
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       Bookmark b0 = new Bookmark(0, BOOKMARK_PLAIN);
       Bookmark b1 = new Bookmark(1, BOOKMARK_PLAIN);
@@ -138,6 +138,7 @@ public class JScrubber extends JComponent {
       this.zoom = zoom;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       setZoomFraction(1.0 / zoom);
     }
@@ -151,6 +152,7 @@ public class JScrubber extends JComponent {
       this.op = op;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       bookmarks.add(new Bookmark(popupPosition, op));
       repaint();
@@ -171,10 +173,12 @@ public class JScrubber extends JComponent {
     listeners.add(l);
   }
 
+  @Override
   public Dimension getMinimumSize() {
     return new Dimension(100, MIN_HEIGHT);
   }
 
+  @Override
   public Dimension getPreferredSize() {
     Dimension d = super.getPreferredSize();
     return new Dimension((int) d.getWidth(), (int) Math.max(d.getHeight(), MIN_HEIGHT));
@@ -268,6 +272,7 @@ public class JScrubber extends JComponent {
     }
   }
 
+  @Override
   @SuppressWarnings("unused")
   public void paint(Graphics g) {
     Graphics2D g2d = (Graphics2D) g;
@@ -364,6 +369,7 @@ public class JScrubber extends JComponent {
       return best;
     }
 
+    @Override
     public void mousePressed(MouseEvent e) {
       mouseDownRow = getRow(e.getX(), e.getY());
       double position = getPosition(e.getX(), e.getY(), mouseDownRow);
@@ -373,6 +379,7 @@ public class JScrubber extends JComponent {
       }
     }
 
+    @Override
     public void mouseReleased(MouseEvent e) {
       if (trackbookmark != null) {
         if (trackbookmark.position == 0 || trackbookmark.position == 1) {
@@ -384,6 +391,7 @@ public class JScrubber extends JComponent {
       inhibitGeometryChanges = false;
     }
 
+    @Override
     public void mouseClicked(MouseEvent e) {
       int mods = e.getModifiersEx();
       boolean shift = (mods & MouseEvent.SHIFT_DOWN_MASK) > 0;
@@ -420,6 +428,7 @@ public class JScrubber extends JComponent {
       }
     }
 
+    @Override
     public void mouseDragged(MouseEvent e) {
       double position = getPosition(e.getX(), e.getY(), mouseDownRow);
       if (mouseDownRow == 1)

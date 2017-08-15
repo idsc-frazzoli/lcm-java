@@ -38,6 +38,7 @@ public class LogFileProvider implements Provider {
 
   boolean publishWarned = false;
 
+  @Override
   public synchronized void publish(String channel, byte data[], int offset, int length) {
     if (!writemode) {
       if (publishWarned)
@@ -58,12 +59,15 @@ public class LogFileProvider implements Provider {
     }
   }
 
+  @Override
   public synchronized void subscribe(String channel) {
   }
 
+  @Override
   public void unsubscribe(String channel) {
   }
 
+  @Override
   public synchronized void close() {
     if (reader != null) {
       reader.interrupt();
@@ -85,6 +89,7 @@ public class LogFileProvider implements Provider {
       setDaemon(true);
     }
 
+    @Override
     public void run() {
       try {
         runEx();

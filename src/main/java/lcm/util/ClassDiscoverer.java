@@ -127,6 +127,7 @@ public class ClassDiscoverer {
   // Just list every class that we can find!
   public static void main(String args[]) {
     ClassVisitor cv = new ClassVisitor() {
+      @Override
       @SuppressWarnings("rawtypes")
       public void classFound(String jarfile, Class cls) {
         System.out.printf("%-30s %s\n", jarfile, cls);

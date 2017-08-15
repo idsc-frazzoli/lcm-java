@@ -16,6 +16,7 @@ public class LCMTypeDatabase {
   }
 
   class MyClassVisitor implements ClassDiscoverer.ClassVisitor {
+    @Override
     @SuppressWarnings("rawtypes")
     public void classFound(String jar, Class cls) {
       try {

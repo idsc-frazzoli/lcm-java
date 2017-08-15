@@ -56,6 +56,7 @@ public class JImage extends JComponent {
     popupMenu.add(jmi);
     jmi = new JMenuItem("Fit");
     jmi.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         fit = true;
         repaint();
@@ -84,6 +85,7 @@ public class JImage extends JComponent {
       this.scale = scale;
     }
 
+    @Override
     public void actionPerformed(ActionEvent e) {
       adjustZoom(scale / 100.0, null);
     }
@@ -126,16 +128,19 @@ public class JImage extends JComponent {
     repaint();
   }
 
+  @Override
   public Dimension getMinimumSize() {
     // if (im==null)
     return new Dimension(2, 2);
     // return new Dimension(im.getWidth(), im.getHeight());
   }
 
+  @Override
   public Dimension getPreferredSize() {
     return getMaximumSize();
   }
 
+  @Override
   public Dimension getMaximumSize() {
     if (im == null)
       return new Dimension(2, 2);
@@ -152,6 +157,7 @@ public class JImage extends JComponent {
     return tp;
   }
 
+  @Override
   public synchronized void paint(Graphics gin) {
     Graphics2D g = (Graphics2D) gin;
     if (im == null)
@@ -199,12 +205,15 @@ public class JImage extends JComponent {
     boolean nodrag = true;
     Point dragBegin = null;
 
+    @Override
     public void keyPressed(KeyEvent e) {
     }
 
+    @Override
     public void keyReleased(KeyEvent e) {
     }
 
+    @Override
     public void keyTyped(KeyEvent e) {
     }
 
@@ -213,6 +222,7 @@ public class JImage extends JComponent {
       return false;
     }
 
+    @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
       int amount = e.getWheelRotation();
       Point2D p = new Point2D.Double(e.getPoint().getX(), e.getPoint().getY());
@@ -222,6 +232,7 @@ public class JImage extends JComponent {
         zoomIn(p);
     }
 
+    @Override
     @SuppressWarnings("unused")
     public void mouseDragged(MouseEvent e) {
       int mods = e.getModifiersEx();
@@ -246,13 +257,16 @@ public class JImage extends JComponent {
       }
     }
 
+    @Override
     public void mouseMoved(MouseEvent e) {
     }
 
+    @Override
     public void mousePressed(MouseEvent e) {
       dragBegin = e.getPoint();
     }
 
+    @Override
     @SuppressWarnings("unused")
     public void mouseReleased(MouseEvent e) {
       int mods = e.getModifiersEx();
@@ -263,15 +277,18 @@ public class JImage extends JComponent {
       dragBegin = null;
     }
 
+    @Override
     public void mouseClicked(MouseEvent e) {
       if (e.getButton() == 1 && e.getClickCount() == 2) {
         adjustZoom(1, null);
       }
     }
 
+    @Override
     public void mouseEntered(MouseEvent e) {
     }
 
+    @Override
     public void mouseExited(MouseEvent e) {
     }
   }

@@ -37,6 +37,7 @@ public class MessageAggregator implements LCMSubscriber {
   int max_queue_length = Integer.MAX_VALUE;
 
   /** Internal method, called by LCM when a message is received. */
+  @Override
   public synchronized void messageReceived(LCM lcm, String channel, LCMDataInputStream dins) {
     try {
       byte data[] = new byte[dins.available()];

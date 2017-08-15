@@ -36,7 +36,6 @@ import info.monitorenter.gui.chart.traces.painters.TracePainterDisc;
 
 /** Panel that displays general data for lcm types. Viewed by double-clicking or
  * right-clicking and selecting Structure Viewer on the channel list. */
-@SuppressWarnings("serial")
 public class ObjectPanel extends JPanel {
   String name;
   Object o;
@@ -548,14 +547,17 @@ public class ObjectPanel extends JPanel {
     }
   }
 
+  @Override
   public Dimension getPreferredSize() {
     return new Dimension(lastwidth, lastheight);
   }
 
+  @Override
   public Dimension getMinimumSize() {
     return getPreferredSize();
   }
 
+  @Override
   public Dimension getMaximumSize() {
     return getPreferredSize();
   }
@@ -584,6 +586,7 @@ public class ObjectPanel extends JPanel {
     }
   }
 
+  @Override
   public void paint(Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
     g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -765,6 +768,7 @@ public class ObjectPanel extends JPanel {
     }
   }
 
+  @Override
   public boolean isOptimizedDrawingEnabled() {
     return false;
   }
@@ -794,6 +798,7 @@ public class ObjectPanel extends JPanel {
      *
      * @param e
      * MouseEvent that fired this click */
+    @Override
     public void mouseClicked(MouseEvent e) {
       int x = e.getX(), y = e.getY();
       // check to see if we have clicked on a row in the inspector
@@ -827,6 +832,7 @@ public class ObjectPanel extends JPanel {
      *
      * @param e
      * MouseEvent from the mouse move */
+    @Override
     public void mouseMoved(MouseEvent e) {
       // check to see if we are hovering over any rows of data
       doSparklineInteraction(e);
@@ -843,6 +849,7 @@ public class ObjectPanel extends JPanel {
      *
      * @param e
      * change event that fired this update */
+    @Override
     public void stateChanged(ChangeEvent e) {
       JViewport viewport = (JViewport) e.getSource();
       updateVisibleSparklines(viewport);

@@ -234,6 +234,7 @@ public class LCM {
   }
 
   static class SimpleSubscriber implements LCMSubscriber {
+    @Override
     public void messageReceived(LCM lcm, String channel, LCMDataInputStream dins) {
       System.err.println("RECV: " + channel);
     }

@@ -66,7 +66,6 @@ import javax.swing.table.TableModel;
  * @author Dan van Enckevort
  * @author Parwinder Sekhon
  * @version 2.0 02/27/04 */
-@SuppressWarnings("serial")
 public class TableSorter extends AbstractTableModel {
   protected TableModel tableModel;
   public static final int DESCENDING = -1;
@@ -75,6 +74,7 @@ public class TableSorter extends AbstractTableModel {
   private static Directive EMPTY_DIRECTIVE = new Directive(-1, NOT_SORTED);
   @SuppressWarnings("rawtypes")
   public static final Comparator COMPARABLE_COMAPRATOR = new Comparator() {
+    @Override
     @SuppressWarnings("unchecked")
     public int compare(Object o1, Object o2) {
       return ((Comparable) o1).compareTo(o2);
@@ -82,6 +82,7 @@ public class TableSorter extends AbstractTableModel {
   };
   @SuppressWarnings("rawtypes")
   public static final Comparator LEXICAL_COMPARATOR = new Comparator() {
+    @Override
     public int compare(Object o1, Object o2) {
       return o1.toString().compareTo(o2.toString());
     }
@@ -255,31 +256,38 @@ public class TableSorter extends AbstractTableModel {
   }
 
   // TableModel interface methods
+  @Override
   public synchronized int getRowCount() {
     return (tableModel == null) ? 0 : tableModel.getRowCount();
   }
 
+  @Override
   public synchronized int getColumnCount() {
     return (tableModel == null) ? 0 : tableModel.getColumnCount();
   }
 
+  @Override
   public synchronized String getColumnName(int column) {
     return tableModel.getColumnName(column);
   }
 
+  @Override
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public synchronized Class getColumnClass(int column) {
     return tableModel.getColumnClass(column);
   }
 
+  @Override
   public synchronized boolean isCellEditable(int row, int column) {
     return tableModel.isCellEditable(modelIndex(row), column);
   }
 
+  @Override
   public synchronized Object getValueAt(int row, int column) {
     return tableModel.getValueAt(modelIndex(row), column);
   }
 
+  @Override
   public synchronized void setValueAt(Object aValue, int row, int column) {
     tableModel.setValueAt(aValue, modelIndex(row), column);
   }
@@ -293,6 +301,7 @@ public class TableSorter extends AbstractTableModel {
       this.modelIndex = index;
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public int compareTo(Object o) {
       int row1 = modelIndex;
@@ -322,6 +331,7 @@ public class TableSorter extends AbstractTableModel {
   }
 
   private class TableModelHandler implements TableModelListener {
+    @Override
     public void tableChanged(TableModelEvent e) {
       synchronized (TableSorter.this) {
         // If we're not sorting by anything, just pass the event along.
@@ -380,6 +390,7 @@ public class TableSorter extends AbstractTableModel {
   }
 
   private class MouseHandler extends MouseAdapter {
+    @Override
     public void mouseClicked(MouseEvent e) {
       JTableHeader h = (JTableHeader) e.getSource();
       TableColumnModel columnModel = h.getColumnModel();
@@ -413,6 +424,7 @@ public class TableSorter extends AbstractTableModel {
       this.priority = priority;
     }
 
+    @Override
     public void paintIcon(Component c, Graphics g, int x, int y) {
       Color color = c == null ? Color.GRAY : c.getBackground();
       // In a compound sort, make each succesive triangle 20%
@@ -442,10 +454,12 @@ public class TableSorter extends AbstractTableModel {
       g.translate(-x, -y);
     }
 
+    @Override
     public int getIconWidth() {
       return size;
     }
 
+    @Override
     public int getIconHeight() {
       return size;
     }
@@ -458,6 +472,7 @@ public class TableSorter extends AbstractTableModel {
       this.tableCellRenderer = tableCellRenderer;
     }
 
+    @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
       Component c = tableCellRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
       if (c instanceof JLabel) {

@@ -63,7 +63,6 @@ import javax.swing.table.AbstractTableModel;
 import lcm.lcm.LCM;
 
 /** A GUI implementation of a log player allowing seeking. **/
-@SuppressWarnings("serial")
 public class LogPlayer extends JComponent {
   static {
     System.setProperty("java.net.preferIPv4Stack", "true");
@@ -98,6 +97,7 @@ public class LogPlayer extends JComponent {
   }
 
   class QueueThread extends Thread {
+    @Override
     public void run() {
       while (true) {
         try {
@@ -125,6 +125,7 @@ public class LogPlayer extends JComponent {
       this.playstate = playstate;
     }
 
+    @Override
     public void execute(LogPlayer lp) {
       if (toggle) {
         if (player != null)
@@ -148,6 +149,7 @@ public class LogPlayer extends JComponent {
       this.pos = pos;
     }
 
+    @Override
     public void execute(LogPlayer lp) {
       boolean player_was_running = (player != null);
       if (player_was_running)
@@ -159,6 +161,7 @@ public class LogPlayer extends JComponent {
   }
 
   class StepEvent implements QueuedEvent {
+    @Override
     public void execute(LogPlayer lp) {
       doStep();
     }
@@ -169,6 +172,7 @@ public class LogPlayer extends JComponent {
     String outchannel;
     boolean enabled = true;
 
+    @Override
     public int compareTo(Filter f) {
       return inchannel.compareTo(f.inchannel);
     }
@@ -271,6 +275,7 @@ public class LogPlayer extends JComponent {
     stepPanel.add(stepChannelField, BorderLayout.CENTER);
     JButton toggleAllButton = new JButton("Toggle Selected");
     toggleAllButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         int[] rowIndices = filterTable.getSelectedRows();
         for (int i = 0; i < rowIndices.length; ++i) {
@@ -288,21 +293,25 @@ public class LogPlayer extends JComponent {
     // position.addChangeListener(new MyChangeListener());
     setPlaying(false);
     fasterButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         setSpeed(fasterSpeed(speed));
       }
     });
     slowerButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         setSpeed(slowerSpeed(speed));
       }
     });
     playButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         events.offer(new PlayPauseEvent());
       }
     });
     stepButton.addActionListener(new ActionListener() {
+      @Override
       public void actionPerformed(ActionEvent e) {
         events.offer(new StepEvent());
       }
@@ -312,12 +321,14 @@ public class LogPlayer extends JComponent {
     else
       lcm = new LCM(lcmurl);
     logName.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
         if (e.getClickCount() == 2)
           openDialog();
       }
     });
     timeLabel.addMouseListener(new MouseAdapter() {
+      @Override
       public void mouseClicked(MouseEvent e) {
         show_absolute_time = !show_absolute_time;
       }
@@ -331,14 +342,17 @@ public class LogPlayer extends JComponent {
   }
 
   class MyScrubberListener implements JScrubberListener {
+    @Override
     public void scrubberMovedByUser(JScrubber js, double x) {
       events.offer(new SeekEvent(x));
     }
 
+    @Override
     public void scrubberPassedRepeat(JScrubber js, double from_pos, double to_pos) {
       events.offer(new SeekEvent(to_pos));
     }
 
+    @Override
     public void scrubberExportRegion(JScrubber js, double p0, double p1) {
       System.out.printf("Export %15f %15f\n", p0, p1);
       String outpath = getOutputFileFromDialog();
@@ -366,6 +380,7 @@ public class LogPlayer extends JComponent {
 
   // remote control via UDP packets
   class UDPThread extends Thread {
+    @Override
     @SuppressWarnings("resource")
     public void run() {
       DatagramSocket sock;
@@ -668,6 +683,7 @@ public class LogPlayer extends JComponent {
       stopflag = true;
     }
 
+    @Override
     @SuppressWarnings("unused")
     public void run() {
       long lastTime = 0;
@@ -761,14 +777,17 @@ public class LogPlayer extends JComponent {
   }
 
   class FilterTableModel extends AbstractTableModel {
+    @Override
     public int getRowCount() {
       return filters.size();
     }
 
+    @Override
     public int getColumnCount() {
       return 3;
     }
 
+    @Override
     public String getColumnName(int column) {
       switch (column) {
       case 0:
@@ -777,10 +796,12 @@ public class LogPlayer extends JComponent {
         return "Playback channel";
       case 2:
         return "Enable";
+      default:
+        return "??";
       }
-      return "??";
     }
 
+    @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public Class getColumnClass(int column) {
       switch (column) {
@@ -789,10 +810,12 @@ public class LogPlayer extends JComponent {
         return String.class;
       case 2:
         return Boolean.class;
+      default:
+        return null;
       }
-      return null;
     }
 
+    @Override
     public Object getValueAt(int row, int column) {
       Filter f = filters.get(row);
       switch (column) {
@@ -802,14 +825,17 @@ public class LogPlayer extends JComponent {
         return f.outchannel;
       case 2:
         return f.enabled;
+      default:
+        return "??";
       }
-      return "??";
     }
 
+    @Override
     public boolean isCellEditable(int row, int column) {
       return (column == 1) || (column == 2);
     }
 
+    @Override
     public void setValueAt(Object v, int row, int column) {
       Filter f = filters.get(row);
       if (column == 1)
@@ -906,6 +932,7 @@ public class LogPlayer extends JComponent {
       f.setSize(f.getWidth(), 300);
       f.setVisible(true);
       f.addWindowListener(new WindowAdapter() {
+        @Override
         public void windowClosing(WindowEvent e) {
           try {
             p.savePreferences();

@@ -65,6 +65,7 @@ public class TCPService {
   }
 
   class AcceptThread extends Thread {
+    @Override
     public void run() {
       while (!Thread.interrupted()) {
         try {
@@ -109,6 +110,7 @@ public class TCPService {
       outs.writeInt(TCPProvider.VERSION);
     }
 
+    @Override
     public void run() {
       ///////////////////////
       // read messages until something bad happens.
