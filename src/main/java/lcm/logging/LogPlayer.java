@@ -1,31 +1,18 @@
 package lcm.logging;
 
-import static java.awt.GridBagConstraints.BOTH;
-import static java.awt.GridBagConstraints.CENTER;
-import static java.awt.GridBagConstraints.EAST;
-import static java.awt.GridBagConstraints.HORIZONTAL;
-import static java.awt.GridBagConstraints.NONE;
-import static java.awt.GridBagConstraints.REMAINDER;
-import static java.awt.GridBagConstraints.WEST;
-
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Graphics2D;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
-import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.geom.GeneralPath;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.EOFException;
@@ -60,6 +47,10 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.AbstractTableModel;
 
+import ch.ethz.idsc.tensor.RationalScalar;
+import ch.ethz.idsc.tensor.RealScalar;
+import ch.ethz.idsc.tensor.Scalar;
+import ch.ethz.idsc.tensor.red.Max;
 import lcm.lcm.LCM;
 
 /** A GUI implementation of a log player allowing seeking. **/
@@ -74,8 +65,8 @@ public class LogPlayer extends JComponent {
   JButton fasterButton;
   // JButton fasterButton = new JButton(">>");
   JButton slowerButton; // = new JButton("<<");
-  JLabel speedLabel = new JLabel("1.0", JLabel.CENTER);
-  double speed = 1.0;
+  Scalar speed = RealScalar.ONE;
+  JLabel speedLabel = new JLabel(speed.toString(), JLabel.CENTER);
   static final int POS_MAX = 10000;
   JLabel posLabel = new JLabel("Event 0");
   JLabel timeLabel = new JLabel("Time 0.0s");
@@ -193,17 +184,17 @@ public class LogPlayer extends JComponent {
   JTextField stepChannelField = new JTextField("");
 
   // faster/slower would be better as semi-log.
-  static final double slowerSpeed(double v) {
-    return v / 2;
+  static final Scalar slowerSpeed(Scalar v) {
+    return v.divide(RealScalar.of(2));
   }
 
-  static final double fasterSpeed(double v) {
-    return v * 2;
+  static final Scalar fasterSpeed(Scalar v) {
+    return v.multiply(RealScalar.of(2));
   }
 
-  void setSpeed(double v) {
-    v = Math.max(1.0 / 1024, v); // minimum supported speed (0.000977x)
-    speedLabel.setText(String.format("%.3f", v));
+  void setSpeed(Scalar v) {
+    v = Max.of(RationalScalar.of(1, 1024), v); // minimum supported speed (0.000977x)
+    speedLabel.setText(v.toString());
     speed = v;
   }
 
@@ -228,17 +219,17 @@ public class LogPlayer extends JComponent {
     timeLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
     posLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
     actualSpeedLabel.setFont(new Font("SansSerif", Font.PLAIN, 10));
-    fasterButton = new JButton(new ImageIcon(makeArrowImage(Color.blue, getBackground(), false)));
-    fasterButton.setRolloverIcon(new ImageIcon(makeArrowImage(Color.magenta, getBackground(), false)));
-    fasterButton.setPressedIcon(new ImageIcon(makeArrowImage(Color.red, getBackground(), false)));
+    fasterButton = new JButton(new ImageIcon(StaticHelper.makeArrowImage(Color.blue, getBackground(), false)));
+    fasterButton.setRolloverIcon(new ImageIcon(StaticHelper.makeArrowImage(Color.magenta, getBackground(), false)));
+    fasterButton.setPressedIcon(new ImageIcon(StaticHelper.makeArrowImage(Color.red, getBackground(), false)));
     fasterButton.setBorderPainted(false);
     fasterButton.setContentAreaFilled(false);
     // Borders keep appearing when the buttons are pressed. Not sure why.
     // fasterButton.setBorder(null); //new
     // javax.swing.border.EmptyBorder(0,0,0,0));
-    slowerButton = new JButton(new ImageIcon(makeArrowImage(Color.blue, getBackground(), true)));
-    slowerButton.setRolloverIcon(new ImageIcon(makeArrowImage(Color.magenta, getBackground(), true)));
-    slowerButton.setPressedIcon(new ImageIcon(makeArrowImage(Color.red, getBackground(), true)));
+    slowerButton = new JButton(new ImageIcon(StaticHelper.makeArrowImage(Color.blue, getBackground(), true)));
+    slowerButton.setRolloverIcon(new ImageIcon(StaticHelper.makeArrowImage(Color.magenta, getBackground(), true)));
+    slowerButton.setPressedIcon(new ImageIcon(StaticHelper.makeArrowImage(Color.red, getBackground(), true)));
     slowerButton.setBorderPainted(false);
     slowerButton.setContentAreaFilled(false);
     Font buttonFont = new Font("SansSerif", Font.PLAIN, 10);
@@ -252,22 +243,33 @@ public class LogPlayer extends JComponent {
     p.add(speedLabel);
     p.add(fasterButton);
     // x y w h fillx filly anchor fill insets, ix, iy
-    add(logName, new GridBagConstraints(0, row, 1, 1, 0.0, 0.0, WEST, NONE, insets, 0, 0));
-    add(playButton, new GridBagConstraints(1, row, 1, 1, 0.0, 0.0, CENTER, NONE, insets, 0, 0));
-    add(stepButton, new GridBagConstraints(2, row, 1, 1, 0.0, 0.0, CENTER, NONE, insets, 0, 0));
-    add(p, new GridBagConstraints(3, row, REMAINDER, 1, 0.0, 0.0, EAST, NONE, insets, 0, 0));
+    add(logName, new GridBagConstraints(0, row, 1, 1, 0.0, 0.0, //
+        GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+    add(playButton, new GridBagConstraints(1, row, 1, 1, 0.0, 0.0, //
+        GridBagConstraints.CENTER, GridBagConstraints.NONE, insets, 0, 0));
+    add(stepButton, new GridBagConstraints(2, row, 1, 1, 0.0, 0.0, //
+        GridBagConstraints.CENTER, GridBagConstraints.NONE, insets, 0, 0));
+    add(p, new GridBagConstraints(3, row, GridBagConstraints.REMAINDER, 1, 0.0, 0.0, //
+        GridBagConstraints.EAST, GridBagConstraints.NONE, insets, 0, 0));
     row++;
-    add(js, new GridBagConstraints(0, row, REMAINDER, 1, 1.0, 0.0, CENTER, HORIZONTAL, new Insets(0, 5, 0, 5), 0, 0));
+    add(js, new GridBagConstraints(0, row, GridBagConstraints.REMAINDER, 1, 1.0, 0.0, //
+        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 5, 0, 5), 0, 0));
     row++;
-    add(timeLabel, new GridBagConstraints(0, row, 1, 1, 0.0, 0.0, WEST, NONE, new Insets(0, 10, 0, 0), 0, 0));
-    add(actualSpeedLabel, new GridBagConstraints(1, row, 1, 1, 0.0, 0.0, WEST, NONE, new Insets(0, 10, 0, 0), 0, 0));
-    add(posLabel, new GridBagConstraints(3, row, 1, 1, 0.0, 0.0, EAST, NONE, new Insets(0, 0, 0, 10), 0, 0));
+    add(timeLabel, new GridBagConstraints(0, row, 1, 1, 0.0, 0.0, //
+        GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 10, 0, 0), 0, 0));
+    add(actualSpeedLabel, new GridBagConstraints(1, row, 1, 1, 0.0, 0.0, //
+        GridBagConstraints.WEST, GridBagConstraints.NONE, new Insets(0, 10, 0, 0), 0, 0));
+    add(posLabel, new GridBagConstraints(3, row, 1, 1, 0.0, 0.0, //
+        GridBagConstraints.EAST, GridBagConstraints.NONE, new Insets(0, 0, 0, 10), 0, 0));
     row++;
-    add(new JScrollPane(filterTable), new GridBagConstraints(0, row, REMAINDER, 1, 1.0, 1.0, CENTER, BOTH, new Insets(0, 0, 0, 0), 0, 0));
+    add(new JScrollPane(filterTable), new GridBagConstraints(0, row, GridBagConstraints.REMAINDER, 1, 1.0, 1.0, //
+        GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
     row++;
     /// spacers
-    add(Box.createHorizontalStrut(90), new GridBagConstraints(0, row, 1, 1, 0.0, 0.0, WEST, NONE, insets, 0, 0));
-    add(Box.createHorizontalStrut(100), new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, WEST, NONE, insets, 0, 0));
+    add(Box.createHorizontalStrut(90), new GridBagConstraints(0, row, 1, 1, 0.0, 0.0, //
+        GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
+    add(Box.createHorizontalStrut(100), new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, //
+        GridBagConstraints.WEST, GridBagConstraints.NONE, insets, 0, 0));
     ///////////////////////////
     row++;
     JPanel stepPanel = new JPanel(new BorderLayout());
@@ -288,8 +290,10 @@ public class LogPlayer extends JComponent {
         }
       }
     });
-    add(toggleAllButton, new GridBagConstraints(0, row, 2, 1, 0.0, 0.0, CENTER, NONE, insets, 0, 0));
-    add(stepPanel, new GridBagConstraints(2, row, REMAINDER, 1, 1.0, 0.0, CENTER, HORIZONTAL, new Insets(0, 5, 0, 5), 0, 0));
+    add(toggleAllButton, new GridBagConstraints(0, row, 2, 1, 0.0, 0.0, //
+        GridBagConstraints.CENTER, GridBagConstraints.NONE, insets, 0, 0));
+    add(stepPanel, new GridBagConstraints(2, row, GridBagConstraints.REMAINDER, 1, 1.0, 0.0, //
+        GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 5, 0, 5), 0, 0));
     // position.addChangeListener(new MyChangeListener());
     setPlaying(false);
     fasterButton.addActionListener(new ActionListener() {
@@ -430,6 +434,7 @@ public class LogPlayer extends JComponent {
 
   String getOutputFileFromDialog() {
     JFileChooser chooser = new JFileChooser();
+    chooser.setBounds(100, 100, 1000, 800);
     int res = chooser.showSaveDialog(this);
     if (res != JFileChooser.APPROVE_OPTION)
       return null;
@@ -438,6 +443,7 @@ public class LogPlayer extends JComponent {
 
   void openDialog() {
     doStop();
+    jfc.setBounds(100, 100, 1000, 800);
     int res = jfc.showOpenDialog(this);
     if (res != JFileChooser.APPROVE_OPTION)
       return;
@@ -595,8 +601,7 @@ public class LogPlayer extends JComponent {
   }
 
   // the player can stop automatically on error or EOF; we thus have
-  // a potential race condition between auto-stops and requested
-  // stops.
+  // a potential race condition between auto-stops and requested stops.
   //
   // We protect these two with 'sync'.
   void doStop() {
@@ -691,14 +696,14 @@ public class LogPlayer extends JComponent {
       long localOffset = 0;
       long logOffset = 0;
       long last_e_utime = 0;
-      double lastspeed = 0;
+      Scalar lastspeed = RealScalar.ZERO;
       synchronized (sync) {
         setPlaying(true);
       }
       try {
         while (!stopflag) {
           Log.Event e = log.readNext();
-          if (speed != lastspeed) {
+          if (!speed.equals(lastspeed)) {
             // System.out.printf("Speed changed. Old %12.6f new
             // %12.6f\n",
             // lastspeed, speed);
@@ -710,7 +715,7 @@ public class LogPlayer extends JComponent {
           long now = System.nanoTime();
           long clockRelativeTime = now / 1000 - localOffset;
           // we don't support playback below a rate of 1/1024x
-          long speed_scale = (long) Math.max(1, (speed * 1024.0));
+          long speed_scale = (long) Math.max(1, (speed.number().doubleValue() * 1024.0));
           long waitTime = (1024 * logRelativeTime / speed_scale - clockRelativeTime);
           long waitms = waitTime / 1000;
           waitms = Math.max(0, waitms);
@@ -953,39 +958,5 @@ public class LogPlayer extends JComponent {
     } catch (IOException ex) {
       System.out.println("Exception: " + ex);
     }
-  }
-
-  static BufferedImage makeArrowImage(Color fillColor, Color backgroundColor, boolean flip) {
-    int height = 18, width = 18;
-    BufferedImage im = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-    Graphics2D g = im.createGraphics();
-    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-    // g.setColor(backgroundColor);
-    g.setColor(new Color(0, 0, 0, 0));
-    // g.setColor(new Color(0,0,255,128));
-    g.fillRect(0, 0, width, height);
-    if (flip) {
-      g.translate(width - 1, height / 2);
-      g.scale(-height / 2, height / 2);
-    } else {
-      g.translate(0, height / 2);
-      g.scale(height / 2, height / 2);
-    }
-    g.setStroke(new BasicStroke(0f));
-    GeneralPath gp = new GeneralPath();
-    gp.moveTo(0, -1);
-    gp.lineTo(1, 0);
-    gp.lineTo(0, 1);
-    gp.lineTo(0, -1);
-    g.setColor(fillColor);
-    g.fill(gp);
-    g.setColor(Color.black);
-    // g.draw(gp);
-    g.translate(.75, 0);
-    g.setColor(fillColor);
-    g.fill(gp);
-    g.setColor(Color.black);
-    // g.draw(gp);
-    return im;
   }
 }
