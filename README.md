@@ -8,4 +8,15 @@ Original code from `https://lcm-proj.github.io/`
 
 Code adapted in collaboration with `SwissTrolley+`
 
-Version `0.0.1`
+100% compatible with original LCM
+
+Version `0.0.2`
+
+## Enhancements in Spy
+
+* display of total data rate
+* alignments of columns
+
+## Enhancements in LogPlayer
+
+* file chooser dialog

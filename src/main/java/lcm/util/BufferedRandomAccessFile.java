@@ -6,17 +6,20 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 
 public class BufferedRandomAccessFile {
-  RandomAccessFile raf;
-  static final int BUFFER_SIZE = 32768; // must be power of two!
-  boolean bufferDirty = false; // buffer needs to be written back to disk? (If
-                               // true, reads MUST use buffer.)
-  byte[] buffer = new byte[BUFFER_SIZE];
-  long bufferOffset = -1; // what file offset does this buffer start at?
-  int bufferLength = -1; // how many bytes of the buffer are valid? ( <
-                         // BUFFER_SIZE near end of file)
-  int bufferPosition = -1; // current file position in the buffer [0,
-                           // BUFFER_SIZE-1]
-  long fileLength; // length of the file
+  private static final int BUFFER_SIZE = 32768; // must be power of two!
+  // ---
+  private RandomAccessFile raf;
+  /** buffer needs to be written back to disk? (If true, reads MUST use buffer.) */
+  private boolean bufferDirty = false;
+  private byte[] buffer = new byte[BUFFER_SIZE];
+  /** what file offset does this buffer start at? */
+  private long bufferOffset = -1;
+  /** how many bytes of the buffer are valid? ( < BUFFER_SIZE near end of file) */
+  private int bufferLength = -1;
+  /** current file position in the buffer [0, BUFFER_SIZE-1] */
+  private int bufferPosition = -1;
+  /** length of the file */
+  private long fileLength;
 
   /** Invariant: the current file position = bufferOffset + bufferPosition.
    * This position is always stored inside the buffer, or this position is the

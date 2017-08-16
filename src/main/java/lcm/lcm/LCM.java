@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 /** Lightweight Communications and Marshalling Java implementation **/
@@ -14,9 +16,9 @@ public class LCM {
     LCMSubscriber lcsub;
   }
 
-  ArrayList<SubscriptionRecord> subscriptions = new ArrayList<SubscriptionRecord>();
-  ArrayList<Provider> providers = new ArrayList<Provider>();
-  HashMap<String, ArrayList<SubscriptionRecord>> subscriptionsMap = new HashMap<String, ArrayList<SubscriptionRecord>>();
+  List<SubscriptionRecord> subscriptions = new ArrayList<>();
+  List<Provider> providers = new ArrayList<>();
+  Map<String, ArrayList<SubscriptionRecord>> subscriptionsMap = new HashMap<>();
   boolean closed = false;
   static LCM singleton;
   LCMDataOutputStream encodeBuffer = new LCMDataOutputStream(new byte[1024]);

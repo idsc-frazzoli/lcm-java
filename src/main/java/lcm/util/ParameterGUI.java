@@ -12,6 +12,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -27,11 +29,11 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 public class ParameterGUI {
-  HashMap<String, PValue> parammap = new HashMap<String, PValue>();
+  Map<String, PValue> parammap = new HashMap<>();
   JPanel panel = new JPanel(new GridBagLayout());
   int row = 0;
   GridBagConstraints gA, gB, gC, gD, gBC, gCD, gBCD, gABCD;
-  ArrayList<ParameterListener> listeners = new ArrayList<ParameterListener>();
+  List<ParameterListener> listeners = new ArrayList<>();
   boolean showvars;
 
   /** This makes a text field yellow until they've pressed return; it's a

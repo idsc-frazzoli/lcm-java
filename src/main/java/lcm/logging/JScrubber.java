@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.ButtonGroup;
@@ -24,18 +25,19 @@ public class JScrubber extends JComponent {
   static final int BOOKMARK_HEIGHT = 15, BOOKMARK_WIDTH = 6;
   static final int CLICK_CLOSENESS = 5;
   static final int REPEAT_DOT_SIZE = 4;
-  double position = 0.5;
-  double zoomfrac = 0.1;
-  double zoom0, zoom1; // positions (0,1) representing the left and right end
-                       // of the zoom scrubber
-  int cy, cy2;
-  int lastDrawX = -1, lastDrawX2 = -1; // used to eliminate extra redraws
-  ArrayList<JScrubberListener> listeners = new ArrayList<JScrubberListener>();
-  boolean inhibitGeometryChanges = false;
-  JPopupMenu popupMenu = new JPopupMenu();
-  double popupPosition;
-  int mouseDownRow = 0;
-  public static final int BOOKMARK_PLAIN = 0, BOOKMARK_LREPEAT = 1, BOOKMARK_RREPEAT = 2;
+  static final int BOOKMARK_PLAIN = 0, BOOKMARK_LREPEAT = 1, BOOKMARK_RREPEAT = 2;
+  // ---
+  private double position = 0.5;
+  private double zoomfrac = 0.1;
+  /** positions (0,1) representing the left and right end of the zoom scrubber */
+  private double zoom0, zoom1;
+  private int cy, cy2;
+  private int lastDrawX = -1, lastDrawX2 = -1; // used to eliminate extra redraws
+  private List<JScrubberListener> listeners = new ArrayList<>();
+  private boolean inhibitGeometryChanges = false;
+  private JPopupMenu popupMenu = new JPopupMenu();
+  private double popupPosition;
+  private int mouseDownRow = 0;
 
   class Bookmark {
     double position;
@@ -47,7 +49,7 @@ public class JScrubber extends JComponent {
     }
   }
 
-  ArrayList<Bookmark> bookmarks = new ArrayList<Bookmark>();
+  List<Bookmark> bookmarks = new ArrayList<>();
 
   public JScrubber() {
     MyMouseAdapter ma = new MyMouseAdapter();
@@ -83,7 +85,7 @@ public class JScrubber extends JComponent {
     repaint();
   }
 
-  public ArrayList<Bookmark> getBookmarks() {
+  public List<Bookmark> getBookmarks() {
     return bookmarks;
   }
 

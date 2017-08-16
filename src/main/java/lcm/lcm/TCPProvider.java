@@ -10,6 +10,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.HashSet;
+import java.util.Set;
 
 /** LCM provider for the tcpq: URL. All messages are sent to a central "hub"
  * process (that must be started separately), which will relay the messages to
@@ -34,7 +35,7 @@ public class TCPProvider implements Provider {
   public static final int MESSAGE_TYPE_PUBLISH = 1;
   public static final int MESSAGE_TYPE_SUBSCRIBE = 2;
   public static final int MESSAGE_TYPE_UNSUBSCRIBE = 3;
-  HashSet<String> subscriptions = new HashSet<String>();
+  Set<String> subscriptions = new HashSet<>();
 
   public TCPProvider(LCM lcm, URLParser up) throws IOException {
     this.lcm = lcm;

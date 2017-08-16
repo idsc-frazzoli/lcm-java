@@ -1,6 +1,7 @@
 package lcm.spy;
 
 import java.util.LinkedList;
+import java.util.List;
 
 /** Global class allowing multiple charts to know about each other and make
  * intelligent decisions based on that.
@@ -13,7 +14,7 @@ public class ChartData {
   private long startuTime; // start time of lcm-spy, which all X-axis are
                            // based off of
   // list of all charts displayed
-  private LinkedList<ZoomableChartScrollWheel> charts = new LinkedList<ZoomableChartScrollWheel>();
+  private List<ZoomableChartScrollWheel> charts = new LinkedList<>();
   // constants for setting how much data we keep for each type of graph
   public final int sparklineChartSize = 500;
   public final int detailedSparklineChartSize = 1500;
@@ -30,7 +31,7 @@ public class ChartData {
   /** Returns all charts being displayed
    * 
    * @return all chrats being displayed */
-  public LinkedList<ZoomableChartScrollWheel> getCharts() {
+  public List<ZoomableChartScrollWheel> getCharts() {
     return charts;
   }
 

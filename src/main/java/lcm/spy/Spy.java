@@ -14,6 +14,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -37,13 +39,13 @@ public class Spy {
   LCM lcm;
   LCMTypeDatabase handlers;
   long startuTime; // time that lcm-spy started
-  HashMap<String, ChannelData> channelMap = new HashMap<String, ChannelData>();
-  ArrayList<ChannelData> channelList = new ArrayList<ChannelData>();
+  Map<String, ChannelData> channelMap = new HashMap<>();
+  List<ChannelData> channelList = new ArrayList<>();
   ChannelTableModel _channelTableModel = new ChannelTableModel();
   TableSorter channelTableModel = new TableSorter(_channelTableModel);
   JTable channelTable = new JTable(channelTableModel);
   ChartData chartData;
-  ArrayList<SpyPlugin> plugins = new ArrayList<SpyPlugin>();
+  List<SpyPlugin> plugins = new ArrayList<>();
   JButton clearButton = new JButton("Clear");
   JFrame jif;
   HzThread thread; // Added by Jen

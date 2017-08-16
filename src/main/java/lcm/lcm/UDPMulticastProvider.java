@@ -8,6 +8,7 @@ import java.net.InetAddress;
 import java.net.MulticastSocket;
 import java.net.SocketAddress;
 import java.util.HashMap;
+import java.util.Map;
 
 /** LCM provider for the udpm: URL. All messages are broadcast over a
  * pre-arranged UDP multicast address. Subscription operations are a no-op,
@@ -17,18 +18,19 @@ import java.util.HashMap;
  * to transmit messages more than once when there are multiple subscribers.
  * Since it uses UDP, it is lossy. **/
 public class UDPMulticastProvider implements Provider {
-  MulticastSocket sock;
   static final String DEFAULT_NETWORK = "239.255.76.67:7667";
   static final int DEFAULT_TTL = 0;
   static final int MAGIC_SHORT = 0x4c433032; // ascii of "LC02"
   static final int MAGIC_LONG = 0x4c433033; // ascii of "LC03"
   static final int FRAGMENTATION_THRESHOLD = 64000;
-  ReaderThread reader;
-  int msgSeqNumber = 0;
-  HashMap<SocketAddress, FragmentBuffer> fragBufs = new HashMap<SocketAddress, FragmentBuffer>();
-  LCM lcm;
-  InetAddress inetAddr;
-  int inetPort;
+  // ---
+  private MulticastSocket sock;
+  private ReaderThread reader;
+  private int msgSeqNumber = 0;
+  private Map<SocketAddress, FragmentBuffer> fragBufs = new HashMap<>();
+  private LCM lcm;
+  private InetAddress inetAddr;
+  private int inetPort;
   static {
     System.setProperty("java.net.preferIPv4Stack", "true");
     System.err.println("LCM: Disabling IPV6 support");

@@ -1,9 +1,10 @@
 package lcm.lcm;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class URLParser {
-  HashMap<String, String> params = new HashMap<String, String>();
+  private final Map<String, String> params = new HashMap<>();
 
   public URLParser(String url) {
     String prov_networkargs[] = url.split("://", 2);

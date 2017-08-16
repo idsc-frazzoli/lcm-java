@@ -30,6 +30,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.regex.Pattern;
@@ -80,7 +82,7 @@ public class LogPlayer extends JComponent {
   String currentLogPath;
   double total_seconds; // an estimate of how many seconds there are in the
                         // file
-  BlockingQueue<QueuedEvent> events = new LinkedBlockingQueue<QueuedEvent>();
+  BlockingQueue<QueuedEvent> events = new LinkedBlockingQueue<>();
   Object sync = new Object();
 
   interface QueuedEvent {
@@ -172,11 +174,11 @@ public class LogPlayer extends JComponent {
   Pattern filteredPattern;
   boolean invertFilteredPattern;
   FilterTableModel filterTableModel = new FilterTableModel();
-  ArrayList<Filter> filters = new ArrayList<Filter>();
+  List<Filter> filters = new ArrayList<>();
   // JTable calls upon filterTableModel which calls upon filters...
   // which needs to exist before that!
   JTable filterTable = new JTable(filterTableModel);
-  HashMap<String, Filter> filterMap = new HashMap<String, Filter>();
+  Map<String, Filter> filterMap = new HashMap<>();
   JTextField inchannel = new JTextField();
   JTextField outchannel = new JTextField();
   JScrubber js = new JScrubber();
@@ -460,7 +462,7 @@ public class LogPlayer extends JComponent {
     String path = currentLogPath + ".jlp";
     FileWriter fouts = new FileWriter(path);
     BufferedWriter outs = new BufferedWriter(fouts);
-    ArrayList<JScrubber.Bookmark> bookmarks = js.getBookmarks();
+    List<JScrubber.Bookmark> bookmarks = js.getBookmarks();
     for (JScrubber.Bookmark b : bookmarks) {
       String type = "PLAIN";
       if (b.type == JScrubber.BOOKMARK_LREPEAT)

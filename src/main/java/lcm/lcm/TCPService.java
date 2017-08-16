@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
@@ -13,7 +14,7 @@ import java.util.regex.Pattern;
 public class TCPService {
   ServerSocket serverSocket;
   AcceptThread acceptThread;
-  ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
+  List<ClientThread> clients = new ArrayList<>();
   ReadWriteLock clients_lock = new ReentrantReadWriteLock();
   int bytesCount = 0;
 

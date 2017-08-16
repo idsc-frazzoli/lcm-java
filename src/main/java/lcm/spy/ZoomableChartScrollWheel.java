@@ -13,6 +13,7 @@ import java.awt.event.WindowFocusListener;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JMenuItem;
@@ -29,18 +30,18 @@ import info.monitorenter.gui.chart.traces.Trace2DLtd;
 /** Chart that supports panning and zooming in the Google-maps style. */
 public class ZoomableChartScrollWheel extends ZoomableChart {
   private double mouseDownStartX, mouseDownStartY, mouseDownValPerPxX, mouseDownMinX, mouseDownMaxX;
-  private ArrayList<Double> mouseDownValPerPxY = new ArrayList<Double>();
-  private ArrayList<Double> mouseDownMinY = new ArrayList<Double>();
-  private ArrayList<Double> mouseDownMaxY = new ArrayList<Double>();
+  private List<Double> mouseDownValPerPxY = new ArrayList<>();
+  private List<Double> mouseDownMinY = new ArrayList<>();
+  private List<Double> mouseDownMaxY = new ArrayList<>();
   private long lastFocusTime = -1;
   private JFrame frame = null;
   // internal color list
-  private ArrayList<Color> colors = new ArrayList<Color>();
+  private List<Color> colors = new ArrayList<>();
   // color index
   private int colorNum = 0;
   // we need a list of the axes on the right, which we update ourselves
   @SuppressWarnings("rawtypes")
-  private ArrayList<AAxis> rightYAxis = new ArrayList<AAxis>();
+  private List<AAxis> rightYAxis = new ArrayList<>();
   private JPopupMenu popup = new JPopupMenu();
   ChartData chartData;
 
