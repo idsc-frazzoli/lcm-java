@@ -18,16 +18,16 @@ import java.util.List;
 import java.util.Map;
 
 import javax.swing.AbstractAction;
-import javax.swing.Action;
 import javax.swing.JButton;
-import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.table.AbstractTableModel;
+import javax.swing.JToolBar;
 import javax.swing.table.TableColumnModel;
 
+import ch.ethz.idsc.lcm.util.FriendlyFormat;
 import lcm.lcm.LCM;
 import lcm.lcm.LCMDataInputStream;
 import lcm.lcm.LCMSubscriber;
@@ -41,7 +41,7 @@ public class Spy {
   long startuTime; // time that lcm-spy started
   Map<String, ChannelData> channelMap = new HashMap<>();
   List<ChannelData> channelList = new ArrayList<>();
-  ChannelTableModel _channelTableModel = new ChannelTableModel();
+  ChannelTableModel _channelTableModel = new ChannelTableModel(channelList);
   TableSorter channelTableModel = new TableSorter(_channelTableModel);
   JTable channelTable = new JTable(channelTableModel);
   ChartData chartData;
@@ -49,6 +49,9 @@ public class Spy {
   JButton clearButton = new JButton("Clear");
   JFrame jif;
   HzThread thread; // Added by Jen
+  JLabel jLabelInfo = new JLabel();
+  long totalBytes = 0;
+  long totalBytesRate = 0;
 
   public Spy(String lcmurl) throws IOException {
     // sortedChannelTableModel.addMouseListenerToHeaderInTable(channelTable);
@@ -66,9 +69,14 @@ public class Spy {
     jif = new JFrame("LCM Spy");
     jif.setLayout(new BorderLayout());
     jif.add(channelTable.getTableHeader(), BorderLayout.PAGE_START);
-    // XXX weird bug, if clearButton is added after JScrollPane, we get an
-    // error.
-    jif.add(clearButton, BorderLayout.SOUTH);
+    {
+      JToolBar jToolBar = new JToolBar();
+      jToolBar.add(clearButton);
+      jToolBar.addSeparator();
+      jToolBar.add(jLabelInfo);
+      jToolBar.setFloatable(false);
+      jif.add(jToolBar, BorderLayout.NORTH);
+    }
     jif.add(new JScrollPane(channelTable), BorderLayout.CENTER);
     chartData = new ChartData(utime_now());
     jif.setSize(800, 600);
@@ -139,44 +147,6 @@ public class Spy {
     jif.dispose();
   }
 
-  class PluginStarter {
-    private SpyPlugin plugin;
-    private ChannelData cd;
-    private String name;
-
-    public PluginStarter(SpyPlugin pluginIn, ChannelData cdIn) {
-      plugin = pluginIn;
-      cd = cdIn;
-      Action thisAction = plugin.getAction(null, null);
-      name = (String) thisAction.getValue("Name");
-    }
-
-    public Action getAction() {
-      return new PluginStarterAction();
-    }
-
-    class PluginStarterAction extends AbstractAction {
-      public PluginStarterAction() {
-        super(name);
-      }
-
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        // for historical reasons, plugins expect a JDesktopPane
-        // here we create a JFrame, add a JDesktopPane, and start the
-        // plugin by calling its actionPerformed method
-        JFrame pluginFrame = new JFrame(cd.name);
-        pluginFrame.setLayout(new BorderLayout());
-        JDesktopPane pluginJdp = new JDesktopPane();
-        pluginFrame.add(pluginJdp);
-        pluginFrame.setSize(500, 400);
-        pluginFrame.setLocationByPlatform(true);
-        pluginFrame.setVisible(true);
-        plugin.getAction(pluginJdp, cd).actionPerformed(null);
-      }
-    }
-  }
-
   class PluginClassVisitor implements ClassDiscoverer.ClassVisitor {
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -229,72 +199,6 @@ public class Spy {
     return System.nanoTime() / 1000;
   }
 
-  class ChannelTableModel extends AbstractTableModel {
-    @Override
-    public int getColumnCount() {
-      return 8;
-    }
-
-    @Override
-    public int getRowCount() {
-      return channelList.size();
-    }
-
-    @Override
-    public Object getValueAt(int row, int col) {
-      ChannelData cd = channelList.get(row);
-      if (cd == null)
-        return "";
-      switch (col) {
-      case 0:
-        return cd.name;
-      case 1:
-        if (cd.cls == null)
-          return String.format("?? %016x", cd.fingerprint);
-        String s = cd.cls.getName();
-        return s.substring(s.lastIndexOf('.') + 1);
-      case 2:
-        return "" + cd.nreceived;
-      case 3:
-        return String.format("%6.2f", cd.hz);
-      case 4:
-        return String.format("%6.2f ms", 1000.0 / cd.hz); // cd.max_interval/1000.0);
-      case 5:
-        return String.format("%6.2f ms", (cd.max_interval - cd.min_interval) / 1000.0);
-      case 6:
-        return String.format("%6.2f KB/s", (cd.bandwidth / 1024.0));
-      case 7:
-        return "" + cd.nerrors;
-      default:
-        return "???";
-      }
-    }
-
-    @Override
-    public String getColumnName(int col) {
-      switch (col) {
-      case 0:
-        return "Channel";
-      case 1:
-        return "Type";
-      case 2:
-        return "Num Msgs";
-      case 3:
-        return "Hz";
-      case 4:
-        return "1/Hz";
-      case 5:
-        return "Jitter";
-      case 6:
-        return "Bandwidth";
-      case 7:
-        return "Undecodable";
-      default:
-        return "???";
-      }
-    }
-  }
-
   class MySubscriber implements LCMSubscriber {
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -329,6 +233,8 @@ public class Spy {
         cd.hz_min_interval = Math.min(cd.hz_min_interval, interval);
         cd.hz_max_interval = Math.max(cd.hz_max_interval, interval);
         cd.hz_bytes += msg_size;
+        totalBytes += msg_size;
+        totalBytesRate += msg_size;
         cd.last_utime = utime;
         cd.nreceived++;
         o = cd.cls.getConstructor(DataInput.class).newInstance(dins);
@@ -386,6 +292,12 @@ public class Spy {
         channelTableModel.fireTableDataChanged();
         if (selrow >= 0)
           channelTable.setRowSelectionInterval(selrow, selrow);
+        { // TODO not the best design...
+          String rate = FriendlyFormat.byteSize(totalBytesRate, true);
+          String total = FriendlyFormat.byteSize(totalBytes, true);
+          jLabelInfo.setText(rate + "/s " + total);
+        }
+        totalBytesRate = 0;
         try {
           Thread.sleep(1000);
         } catch (InterruptedException ex) {
