@@ -119,11 +119,6 @@ public class ClassDiscoverer {
     }
   }
 
-  public interface ClassVisitor {
-    @SuppressWarnings("rawtypes")
-    public void classFound(String jarfile, Class cls);
-  }
-
   // Just list every class that we can find!
   public static void main(String args[]) {
     ClassVisitor cv = new ClassVisitor() {

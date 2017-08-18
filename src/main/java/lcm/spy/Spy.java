@@ -8,10 +8,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.DataInput;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,12 +26,12 @@ import javax.swing.JToolBar;
 import javax.swing.table.TableColumnModel;
 
 import lcm.lcm.LCM;
-import lcm.lcm.LCMDataInputStream;
-import lcm.lcm.LCMSubscriber;
 import lcm.util.ClassDiscoverer;
+import lcm.util.ClassVisitor;
 import lcm.util.TableSorter;
 
-/** Spy main class. */
+/** Spy main class */
+// FIXME process does not terminate if object panel is opened
 public class Spy {
   LCM lcm;
   LCMTypeDatabase handlers;
@@ -56,7 +54,7 @@ public class Spy {
     // sortedChannelTableModel.addMouseListenerToHeaderInTable(channelTable);
     channelTableModel.setTableHeader(channelTable.getTableHeader());
     channelTableModel.setSortingStatus(0, TableSorter.ASCENDING);
-    handlers = new LCMTypeDatabase();
+    handlers = LCMTypeDatabase.create();
     TableColumnModel tcm = channelTable.getColumnModel();
     tcm.getColumn(0).setMinWidth(140);
     tcm.getColumn(1).setMinWidth(140);
@@ -85,7 +83,7 @@ public class Spy {
       lcm = new LCM();
     else
       lcm = new LCM(lcmurl);
-    lcm.subscribeAll(new MySubscriber());
+    lcm.subscribeAll(new UniversalSubscriber(this));
     thread = new HzThread(this);
     thread.start();
     clearButton.addActionListener(new ActionListener() {
@@ -99,19 +97,19 @@ public class Spy {
     channelTable.addMouseListener(new MouseAdapter() {
       @Override
       @SuppressWarnings("unused")
-      public void mouseClicked(MouseEvent e) {
-        int mods = e.getModifiersEx();
-        if (e.getButton() == 3) {
-          showPopupMenu(e);
-        } else if (e.getClickCount() == 2) {
-          Point p = e.getPoint();
+      public void mouseClicked(MouseEvent mouseEvent) {
+        int mods = mouseEvent.getModifiersEx();
+        if (mouseEvent.getButton() == 3) {
+          showPopupMenu(mouseEvent);
+        } else if (mouseEvent.getClickCount() == 2) {
+          Point p = mouseEvent.getPoint();
           int row = rowAtPoint(p);
           ChannelData cd = channelList.get(row);
           boolean got_one = false;
           for (SpyPlugin plugin : plugins) {
             if (!got_one && plugin.canHandle(cd.fingerprint)) {
               // start the plugin
-              (new PluginStarter(plugin, cd)).getAction().actionPerformed(null);
+              new PluginStarter(plugin, cd).getAction().actionPerformed(null);
               got_one = true;
             }
           }
@@ -122,7 +120,7 @@ public class Spy {
     });
     jFrame.addWindowListener(new WindowAdapter() {
       @Override
-      public void windowClosing(WindowEvent e) {
+      public void windowClosing(WindowEvent windowEvent) {
         System.out.println("Spy quitting");
         close(); // Added by Jen
       }
@@ -145,7 +143,7 @@ public class Spy {
     jFrame.dispose();
   }
 
-  class PluginClassVisitor implements ClassDiscoverer.ClassVisitor {
+  class PluginClassVisitor implements ClassVisitor {
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public void classFound(String jar, Class cls) {
@@ -197,70 +195,6 @@ public class Spy {
     return System.nanoTime() / 1000;
   }
 
-  class MySubscriber implements LCMSubscriber {
-    @Override
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void messageReceived(LCM lcm, String channel, LCMDataInputStream dins) {
-      Object o = null;
-      ChannelData cd = channelMap.get(channel);
-      int msg_size = 0;
-      try {
-        msg_size = dins.available();
-        long fingerprint = (msg_size >= 8) ? dins.readLong() : -1;
-        dins.reset();
-        Class cls = handlers.getClassByFingerprint(fingerprint);
-        if (cd == null) {
-          cd = new ChannelData();
-          cd.name = channel;
-          cd.cls = cls;
-          cd.fingerprint = fingerprint;
-          cd.row = channelList.size();
-          synchronized (channelList) {
-            channelMap.put(channel, cd);
-            channelList.add(cd);
-            _channelTableModel.fireTableDataChanged();
-          }
-        } else {
-          if (cls != null && cd.cls != null && !cd.cls.equals(cls)) {
-            System.out.println("WARNING: Class changed for channel " + channel);
-            cd.nerrors++;
-          }
-        }
-        long utime = utime_now();
-        long interval = utime - cd.last_utime;
-        cd.hz_min_interval = Math.min(cd.hz_min_interval, interval);
-        cd.hz_max_interval = Math.max(cd.hz_max_interval, interval);
-        cd.hz_bytes += msg_size;
-        totalBytes += msg_size;
-        totalBytesRate += msg_size;
-        cd.last_utime = utime;
-        cd.nreceived++;
-        o = cd.cls.getConstructor(DataInput.class).newInstance(dins);
-        cd.last = o;
-        if (cd.viewer != null)
-          cd.viewer.setObject(o, cd.last_utime);
-      } catch (NullPointerException ex) {
-        cd.nerrors++;
-      } catch (IOException ex) {
-        cd.nerrors++;
-        System.out.println("Spy.messageReceived ex: " + ex);
-      } catch (NoSuchMethodException ex) {
-        cd.nerrors++;
-        System.out.println("Spy.messageReceived ex: " + ex);
-      } catch (InstantiationException ex) {
-        cd.nerrors++;
-        System.out.println("Spy.messageReceived ex: " + ex);
-      } catch (IllegalAccessException ex) {
-        cd.nerrors++;
-        System.out.println("Spy.messageReceived ex: " + ex);
-      } catch (InvocationTargetException ex) {
-        cd.nerrors++;
-        // these are almost always spurious
-        // System.out.println("ex: "+ex+"..."+ex.getTargetException());
-      }
-    }
-  }
-
   class DefaultViewer extends AbstractAction {
     ChannelData cd;
 
@@ -299,27 +233,6 @@ public class Spy {
     jm.show(channelTable, e.getX(), e.getY());
   }
 
-  public static void usage() {
-    System.err.println("usage: lcm-spy [options]");
-    System.err.println("");
-    System.err.println("lcm-spy is the Lightweight Communications and Marshalling traffic ");
-    System.err.println("inspection utility.  It is a graphical tool for viewing messages received on ");
-    System.err.println("an LCM network, and is analagous to tools like Ethereal/Wireshark and tcpdump");
-    System.err.println("in that it is able to inspect all LCM messages received and provide information");
-    System.err.println("and statistics on the channels used.");
-    System.err.println("");
-    System.err.println("When given appropriate LCM type definitions, lcm-spy is able to");
-    System.err.println("automatically detect and decode messages, and can display the individual fields");
-    System.err.println("of recognized messages.  lcm-spy is limited to displaying statistics for");
-    System.err.println("unrecognized messages.");
-    System.err.println("");
-    System.err.println("Options:");
-    System.err.println("  -l, --lcm-url=URL      Use the specified LCM URL");
-    System.err.println("  -h, --help             Shows this help text and exits");
-    System.err.println("");
-    System.exit(1);
-  }
-
   public static void main(String args[]) {
     // check if the JRE is supplied by gcj, and warn the user if it is.
     if (System.getProperty("java.vendor").indexOf("Free Software Foundation") >= 0) {
@@ -330,7 +243,7 @@ public class Spy {
     for (int optind = 0; optind < args.length; optind++) {
       String c = args[optind];
       if (c.equals("-h") || c.equals("--help")) {
-        usage();
+        StaticHelper.spyUsage();
       } else if (c.equals("-l") || c.equals("--lcm-url") || c.startsWith("--lcm-url=")) {
         String optarg = null;
         if (c.startsWith("--lcm-url=")) {
@@ -340,12 +253,12 @@ public class Spy {
           optarg = args[optind];
         }
         if (null == optarg) {
-          usage();
+          StaticHelper.spyUsage();
         } else {
           lcmurl = optarg;
         }
       } else {
-        usage();
+        StaticHelper.spyUsage();
       }
     }
     try {

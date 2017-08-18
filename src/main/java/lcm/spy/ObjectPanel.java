@@ -18,6 +18,8 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.swing.JFrame;
@@ -56,10 +58,10 @@ public class ObjectPanel extends JPanel {
   ChartData chartData;
   // array of all sparklines that are visible
   // or near visible to the user right now
-  ArrayList<SparklineData> visibleSparklines = new ArrayList<SparklineData>();
+  List<SparklineData> visibleSparklines = new ArrayList<>();
   boolean visibleSparklinesInitialized = false;
   // array of all sparklines being graphed
-  ArrayList<SparklineData> graphingSparklines = new ArrayList<SparklineData>();
+  List<SparklineData> graphingSparklines = new ArrayList<>();
   // we keep track of each drawing iteration to know if the row we clicked
   // on was displayed. See SparklineData.lastDrawNumber.
   int currentDrawNumber = 0;
@@ -67,34 +69,14 @@ public class ObjectPanel extends JPanel {
   class Section {
     int x0, y0, x1, y1; // bounding coordinates for sensitive area
     boolean collapsed;
-    HashMap<String, SparklineData> sparklines;
+    Map<String, SparklineData> sparklines;
 
     public Section() {
-      sparklines = new HashMap<String, SparklineData>();
+      sparklines = new HashMap<>();
     }
   }
 
-  /** Data about an individual sparkline. */
-  class SparklineData {
-    int xmin, xmax;
-    int ymin, ymax;
-    boolean isHovering;
-    // all sparklines have a chart associated with them, even though
-    // we do not use it for display. This allows us to use the
-    // data-collection
-    // and management features
-    Chart2D chart;
-    String name;
-    Section section;
-    // we keep track of the drawing iteration number for each line
-    // to let us figure out if the line is currently being drawn
-    // when the user clicks it. This is needed to fix a bug where the
-    // user clicks in a place a line used to be, but is no longer
-    // there since the array it was in got shorter.
-    int lastDrawNumber = 0;
-  }
-
-  ArrayList<Section> sections = new ArrayList<Section>();
+  List<Section> sections = new ArrayList<>();
 
   /** Constructor for an object panel, call when the user clicks to see more
    * data about a message.
@@ -105,9 +87,9 @@ public class ObjectPanel extends JPanel {
    * global data about all charts displayed by lcm-spy */
   public ObjectPanel(String name, ChartData chartData) {
     this.name = name;
-    this.setLayout(null); // not using a layout manager, drawing everything
-                          // ourselves
     this.chartData = chartData;
+    // not using a layout manager, drawing everything ourselves
+    setLayout(null);
     addMouseListener(new MyMouseAdapter());
     addMouseMotionListener(new MyMouseMotionListener());
     repaint();
@@ -336,18 +318,12 @@ public class ObjectPanel extends JPanel {
     /** Draws a row for a piece of data in the message and also a sparkline
      * for that data.
      *
-     * @param cls
-     * type of the data
-     * @param name
-     * name of the entry in the message
-     * @param o
-     * the data itself
-     * @param isstatic
-     * true if the data is static
-     * @param sec
-     * index of section this row is in, used to determine if this
-     * row should be highlighted because it is under the mouse
-     * cursor. */
+     * @param cls type of the data
+     * @param name of the entry in the message
+     * @param o the data itself
+     * @param isstatic true if the data is static
+     * @param sec index of section this row is in, used to determine if this
+     * row should be highlighted because it is under the mouse cursor. */
     @SuppressWarnings("rawtypes")
     public void drawStringsAndGraph(Class cls, String name, Object o, boolean isstatic, int sec) {
       Section cs = sections.get(sec);
@@ -415,28 +391,23 @@ public class ObjectPanel extends JPanel {
         }
         data.lastDrawNumber = currentDrawNumber;
         // draw the graph
-        DrawSparkline(x[3], y, trace, isHovering);
+        drawSparkline(x[3], y, trace, isHovering);
       }
       y += textheight;
       g.setFont(of);
       g.setColor(oldColor);
     }
 
-    /** Draws a sparkline.
+    /** draws a sparkline.
      *
-     * @param x
-     * x-coordinate of the left side of the line
-     * @param y
-     * y-coordinate of the top of the line
-     * @param trace
-     * data for the sparkline
-     * @param isHovering
-     * true if the mouse cursor is hovering over this row */
-    public void DrawSparkline(int x, int y, ITrace2D trace, boolean isHovering) {
-      if (trace.getSize() < 2) {
+     * @param x coordinate of the left side of the line
+     * @param y coordinate of the top of the line
+     * @param trace data for the sparkline
+     * @param isHovering true if the mouse cursor is hovering over this row */
+    public void drawSparkline(int x, int y, ITrace2D trace, boolean isHovering) {
+      if (trace.getSize() < 2)
         return;
-      }
-      Graphics2D g2 = (Graphics2D) g;
+      Graphics2D graphics = (Graphics2D) g;
       Iterator<ITracePoint2D> iter = trace.iterator();
       final int circleSize = 3;
       final int height = textheight;
@@ -444,10 +415,9 @@ public class ObjectPanel extends JPanel {
       final double width = sparklineWidth;
       // width = width * ((double)trace.getSize() / (double)
       // trace.getMaxSize());
-      if (trace.getMaxX() == trace.getMinX()) {
+      if (trace.getMaxX() == trace.getMinX())
         // no time series, don't draw anything
         return;
-      }
       Color pointColor = Color.RED;
       Color lineColor = Color.BLACK;
       if (isHovering) {
@@ -461,19 +431,18 @@ public class ObjectPanel extends JPanel {
       if (trace.getMaxY() == trace.getMinY()) {
         // divide by zero error coming up!
         // bail and draw a straight line down the center of the graph
-        g2.setColor(lineColor);
+        graphics.setColor(lineColor);
         ITracePoint2D firstPoint = iter.next();
         int leftLineX = (int) ((firstPoint.getX() - earliestTimeDisplayed) * xscale) + x;
-        if (leftLineX < x) {
+        if (leftLineX < x)
           leftLineX = x;
-        }
-        g2.drawLine(leftLineX, y - (int) ((double) height / (double) 2), x + (int) width, y - (int) ((double) height / (double) 2));
-        g2.setColor(pointColor);
-        g2.fillOval(x + (int) width - 1, y - (int) ((double) height / (double) 2) - 1, circleSize, circleSize);
+        graphics.drawLine(leftLineX, y - (int) ((double) height / (double) 2), x + (int) width, y - (int) ((double) height / (double) 2));
+        graphics.setColor(pointColor);
+        graphics.fillOval(x + (int) width - 1, y - (int) ((double) height / (double) 2) - 1, circleSize, circleSize);
         return;
       }
       double yscale = height / (trace.getMaxY() - trace.getMinY());
-      g2.setColor(lineColor);
+      graphics.setColor(lineColor);
       boolean first = true;
       double lastX = 0, lastY = 0, thisX, thisY;
       while (iter.hasNext()) {
@@ -486,16 +455,16 @@ public class ObjectPanel extends JPanel {
           thisX = (point.getX() - earliestTimeDisplayed) * xscale + x;
           thisY = y - (point.getY() - trace.getMinY()) * yscale;
           if (thisX >= x && lastX >= x) {
-            g2.drawLine((int) lastX, (int) lastY, (int) thisX, (int) thisY);
+            graphics.drawLine((int) lastX, (int) lastY, (int) thisX, (int) thisY);
           }
           lastX = thisX;
           lastY = thisY;
         }
         if (!iter.hasNext()) {
           // this is the last point, bold it
-          g2.setColor(pointColor);
-          g2.fillOval((int) lastX - 1, (int) lastY - 1, 3, 3);
-          g2.setColor(lineColor);
+          graphics.setColor(pointColor);
+          graphics.fillOval((int) lastX - 1, (int) lastY - 1, 3, 3);
+          graphics.setColor(lineColor);
         }
       }
     }
