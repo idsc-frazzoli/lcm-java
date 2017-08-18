@@ -91,7 +91,7 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
       @Override
       public void windowClosing(WindowEvent e) {
         for (ITrace2D trace : newChart.getTraces()) {
-          ((Trace2DLtd) trace).setMaxSize(chartData.sparklineChartSize);
+          ((Trace2DLtd) trace).setMaxSize(ChartData.SPARKLINECHARTSIZE);
         }
         chartData.getCharts().remove(newChart);
       }

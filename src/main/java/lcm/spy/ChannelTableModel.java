@@ -51,6 +51,7 @@ class ChannelTableModel extends AbstractTableModel {
     }
   }
 
+  // TODO design as static array
   @Override
   public String getColumnName(int col) {
     switch (col) {

@@ -11,13 +11,14 @@ import java.util.List;
  * 
  * @author abarry */
 public class ChartData {
-  private long startuTime; // start time of lcm-spy, which all X-axis are
-                           // based off of
-  // list of all charts displayed
+  /** constants for setting how much data we keep for each type of graph */
+  public static final int SPARKLINECHARTSIZE = 500;
+  public static final int SPARKLINECHARTSIZE_DETAILED = 1500;
+  // ---
+  /** start time of lcm-spy, which all X-axis are based off of */
+  private long startuTime;
+  /** list of all charts displayed */
   private List<ZoomableChartScrollWheel> charts = new LinkedList<>();
-  // constants for setting how much data we keep for each type of graph
-  public final int sparklineChartSize = 500;
-  public final int detailedSparklineChartSize = 1500;
 
   /** Constructor for ChartData. Initializes color list and sets the start time
    * of lcm-spy

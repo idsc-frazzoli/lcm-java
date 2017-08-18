@@ -27,14 +27,13 @@ import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.table.TableColumnModel;
 
-import ch.ethz.idsc.lcm.util.FriendlyFormat;
 import lcm.lcm.LCM;
 import lcm.lcm.LCMDataInputStream;
 import lcm.lcm.LCMSubscriber;
 import lcm.util.ClassDiscoverer;
 import lcm.util.TableSorter;
 
-/** Spy main class. **/
+/** Spy main class. */
 public class Spy {
   LCM lcm;
   LCMTypeDatabase handlers;
@@ -47,7 +46,7 @@ public class Spy {
   ChartData chartData;
   List<SpyPlugin> plugins = new ArrayList<>();
   JButton clearButton = new JButton("Clear");
-  JFrame jif;
+  JFrame jFrame;
   HzThread thread; // Added by Jen
   JLabel jLabelInfo = new JLabel();
   long totalBytes = 0;
@@ -66,28 +65,28 @@ public class Spy {
     tcm.getColumn(4).setMaxWidth(100);
     tcm.getColumn(5).setMaxWidth(100);
     tcm.getColumn(6).setMaxWidth(100);
-    jif = new JFrame("LCM Spy");
-    jif.setLayout(new BorderLayout());
-    jif.add(channelTable.getTableHeader(), BorderLayout.PAGE_START);
+    jFrame = new JFrame("LCM Spy");
+    jFrame.setLayout(new BorderLayout());
+    jFrame.add(channelTable.getTableHeader(), BorderLayout.PAGE_START);
     {
       JToolBar jToolBar = new JToolBar();
       jToolBar.add(clearButton);
       jToolBar.addSeparator();
       jToolBar.add(jLabelInfo);
       jToolBar.setFloatable(false);
-      jif.add(jToolBar, BorderLayout.NORTH);
+      jFrame.add(jToolBar, BorderLayout.NORTH);
     }
-    jif.add(new JScrollPane(channelTable), BorderLayout.CENTER);
+    jFrame.add(new JScrollPane(channelTable), BorderLayout.CENTER);
     chartData = new ChartData(utime_now());
-    jif.setSize(800, 600);
-    jif.setLocationByPlatform(true);
-    jif.setVisible(true);
+    jFrame.setSize(800, 600);
+    jFrame.setLocationByPlatform(true);
+    jFrame.setVisible(true);
     if (null == lcmurl)
       lcm = new LCM();
     else
       lcm = new LCM(lcmurl);
     lcm.subscribeAll(new MySubscriber());
-    thread = new HzThread();
+    thread = new HzThread(this);
     thread.start();
     clearButton.addActionListener(new ActionListener() {
       @Override
@@ -121,12 +120,11 @@ public class Spy {
         }
       }
     });
-    jif.addWindowListener(new WindowAdapter() {
+    jFrame.addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosing(WindowEvent e) {
         System.out.println("Spy quitting");
         close(); // Added by Jen
-        // System.exit(0); // jan deactivated this
       }
     });
     ClassDiscoverer.findClasses(new PluginClassVisitor());
@@ -143,8 +141,8 @@ public class Spy {
     } catch (Exception e) {
     }
     thread.interrupt(); // Added by Jen
-    jif.setVisible(false);
-    jif.dispose();
+    jFrame.setVisible(false);
+    jFrame.dispose();
   }
 
   class PluginClassVisitor implements ClassDiscoverer.ClassVisitor {
@@ -259,50 +257,6 @@ public class Spy {
         cd.nerrors++;
         // these are almost always spurious
         // System.out.println("ex: "+ex+"..."+ex.getTargetException());
-      }
-    }
-  }
-
-  class HzThread extends Thread {
-    public HzThread() {
-      // setDaemon(true); // Modified by Jen
-      setName("LCM-Spy"); // Modified by Jen
-    }
-
-    @Override
-    public void run() {
-      while (!isInterrupted()) {
-        long utime = utime_now();
-        synchronized (channelList) {
-          for (ChannelData cd : channelList) {
-            long diff_recv = cd.nreceived - cd.hz_last_nreceived;
-            cd.hz_last_nreceived = cd.nreceived;
-            long dutime = utime - cd.hz_last_utime;
-            cd.hz_last_utime = utime;
-            cd.hz = diff_recv / (dutime / 1000000.0);
-            cd.min_interval = cd.hz_min_interval;
-            cd.max_interval = cd.hz_max_interval;
-            cd.hz_min_interval = 9999;
-            cd.hz_max_interval = 0;
-            cd.bandwidth = cd.hz_bytes / (dutime / 1000000.0);
-            cd.hz_bytes = 0;
-          }
-        }
-        int selrow = channelTable.getSelectedRow();
-        channelTableModel.fireTableDataChanged();
-        if (selrow >= 0)
-          channelTable.setRowSelectionInterval(selrow, selrow);
-        { // TODO not the best design...
-          String rate = FriendlyFormat.byteSize(totalBytesRate, true);
-          String total = FriendlyFormat.byteSize(totalBytes, true);
-          jLabelInfo.setText(rate + "/s " + total);
-        }
-        totalBytesRate = 0;
-        try {
-          Thread.sleep(1000);
-        } catch (InterruptedException ex) {
-          interrupt();
-        }
       }
     }
   }
