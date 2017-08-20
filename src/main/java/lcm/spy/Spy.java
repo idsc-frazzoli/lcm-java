@@ -31,6 +31,7 @@ import javax.swing.table.TableColumnModel;
 import lcm.lcm.LCM;
 import lcm.util.ClassDiscoverer;
 import lcm.util.ClassVisitor;
+import lcm.util.LcmStaticHelper;
 import lcm.util.TableSorter;
 
 /** Spy main class */
@@ -247,11 +248,7 @@ public class Spy {
   }
 
   public static void main(String args[]) {
-    // check if the JRE is supplied by gcj, and warn the user if it is.
-    if (System.getProperty("java.vendor").indexOf("Free Software Foundation") >= 0) {
-      System.err.println("WARNING: Detected gcj. lcm-spy is not known to work well with gcj.");
-      System.err.println("         The Sun JRE is recommended.");
-    }
+    LcmStaticHelper.checkJre();
     String lcmurl = null;
     for (int optind = 0; optind < args.length; optind++) {
       String c = args[optind];

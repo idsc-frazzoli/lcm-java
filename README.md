@@ -8,7 +8,9 @@ Original code from `https://lcm-proj.github.io/`
 
 Code adapted in collaboration with `SwissTrolley+`
 
-100% compatible with original LCM
+Compatible with original Java LCM Tools: Spy, LogPlayer, ...
+
+Only modification: Class discovery is narrowed.
 
 Version `0.0.2`
 
@@ -20,7 +22,6 @@ Version `0.0.2`
 ## Enhancements in LogPlayer
 
 * file chooser dialog
-
 
 ## General Setup
 
@@ -39,7 +40,7 @@ Remember, you must always do this to use LCM if your machine is not connected to
         <dependency>
             <groupId>ch.ethz.idsc</groupId>
             <artifactId>lcm-java</artifactId>
-            <version>0.0.1</version>
+            <version>0.0.2</version>
         </dependency>
     </dependencies>
 

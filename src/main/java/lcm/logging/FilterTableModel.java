@@ -4,15 +4,15 @@ package lcm.logging;
 
 import javax.swing.table.AbstractTableModel;
 
-import lcm.logging.LogPlayer.Filter;
+import lcm.logging.LogPlayerComponent.Filter;
 
 class FilterTableModel extends AbstractTableModel {
   private static final String[] COLUMN_NAME = { "Log channel", "Playback channel", "Enable" };
   // ---
-  private final LogPlayer logPlayer;
+  private final LogPlayerComponent logPlayer;
 
   /** @param logPlayer */
-  FilterTableModel(LogPlayer logPlayer) {
+  FilterTableModel(LogPlayerComponent logPlayer) {
     this.logPlayer = logPlayer;
   }
 

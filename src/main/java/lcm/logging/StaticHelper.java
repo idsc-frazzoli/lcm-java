@@ -43,4 +43,24 @@ enum StaticHelper {
     // g.draw(gp);
     return im;
   }
+
+  static void usage() {
+    System.err.println("usage: lcm-logplayer-gui [options] [log-name]");
+    System.err.println("");
+    System.err.println("lcm-logplayer-gui is the Lightweight Communications and Marshalling");
+    System.err.println("log playback tool.  It provides a graphical user interface for playing logfiles");
+    System.err.println("recorded with lcm-core.  Features include random access, different playback ");
+    System.err.println("speeds, channel suppression and remapping, and more.");
+    System.err.println("");
+    System.err.println("Options:");
+    System.err.println("  -l, --lcm-url=URL      Use the specified LCM URL");
+    System.err.println("  -p, --paused           Start with the log paused.");
+    System.err.println("  -f, --filter=CHAN      Disable channels that match the regex in CHAN.");
+    System.err.println("                         (default: \"\")");
+    System.err.println("  -v, --invert-filter    Invert the filtering regex. Only enable channels");
+    System.err.println("                         matching CHAN.");
+    System.err.println("  -h, --help             Shows this help text and exits");
+    System.err.println("");
+    System.exit(1);
+  }
 }
