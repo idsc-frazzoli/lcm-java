@@ -17,13 +17,13 @@ public class LogPlayer {
   }
   // ---
 
-  public final LogPlayerComponent logPlayer;
+  public final LogPlayerComponent logPlayerComponent;
   public final JFrame jFrame = new JFrame("LogPlayer");
 
   private LogPlayer(LogPlayerConfig cfg) throws IOException {
-    logPlayer = new LogPlayerComponent(cfg.lcmurl);
+    logPlayerComponent = new LogPlayerComponent(cfg.lcmurl, cfg.speed);
     jFrame.setLayout(new BorderLayout());
-    jFrame.add(logPlayer, BorderLayout.CENTER);
+    jFrame.add(logPlayerComponent, BorderLayout.CENTER);
     jFrame.pack();
     jFrame.setSize(jFrame.getWidth(), 300);
     jFrame.setVisible(true);
@@ -31,7 +31,7 @@ public class LogPlayer {
       @Override
       public void windowClosing(WindowEvent e) {
         try {
-          logPlayer.savePreferences();
+          logPlayerComponent.savePreferences();
         } catch (IOException ex) {
           System.out.println("Couldn't save preferences: " + ex);
         }
@@ -40,13 +40,13 @@ public class LogPlayer {
       }
     });
     if (cfg.channelFilterRegex != null)
-      logPlayer.setChannelFilter(cfg.channelFilterRegex);
+      logPlayerComponent.setChannelFilter(cfg.channelFilterRegex);
     if (cfg.invertChannelFilter)
-      logPlayer.invertChannelFilter();
+      logPlayerComponent.invertChannelFilter();
     if (cfg.logFile != null)
-      logPlayer.setLog(cfg.logFile, !cfg.startPaused);
+      logPlayerComponent.setLog(cfg.logFile, !cfg.startPaused);
     else
-      logPlayer.openDialog();
+      logPlayerComponent.openDialog();
   }
 
   public static void main(String args[]) throws IOException {

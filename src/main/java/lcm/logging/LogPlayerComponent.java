@@ -188,10 +188,10 @@ public class LogPlayerComponent extends JComponent {
     return v.multiply(RealScalar.of(2));
   }
 
-  private void setSpeed(Scalar v) {
-    v = Max.of(RationalScalar.of(1, 1024), v); // minimum supported speed (0.000977x)
-    speedLabel.setText(v.toString());
-    speed = v;
+  void setSpeed(Scalar value) {
+    value = Max.of(RationalScalar.of(1, 1024), value); // minimum supported speed (0.000977x)
+    speedLabel.setText(value.toString());
+    speed = value;
   }
 
   void setChannelFilter(String channelFilterRegex) {
@@ -202,7 +202,8 @@ public class LogPlayerComponent extends JComponent {
     invertFilteredPattern = true;
   }
 
-  public LogPlayerComponent(String lcmurl) throws IOException {
+  LogPlayerComponent(String lcmurl, Scalar _speed) throws IOException {
+    setSpeed(_speed);
     setLayout(new GridBagLayout());
     @SuppressWarnings("unused")
     GridBagConstraints gbc = new GridBagConstraints();
