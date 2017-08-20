@@ -1,3 +1,4 @@
+// code by lcm
 package lcm.logging;
 
 import java.awt.Color;

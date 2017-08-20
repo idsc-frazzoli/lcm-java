@@ -1,3 +1,4 @@
+// code by lcm
 package lcm.logging;
 
 import java.awt.BorderLayout;
@@ -47,7 +48,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.table.AbstractTableModel;
 
 import ch.ethz.idsc.tensor.RationalScalar;
 import ch.ethz.idsc.tensor.RealScalar;
@@ -61,29 +61,29 @@ public class LogPlayer extends JComponent {
     System.setProperty("java.net.preferIPv4Stack", "true");
     System.out.println("LC: Disabling IPV6 support");
   }
-  Log log;
-  JButton playButton = new JButton("Play ");
-  JButton stepButton = new JButton("Step");
-  JButton fasterButton;
+  // ---
+  private Log log;
+  private final JButton playButton = new JButton("Play ");
+  private final JButton stepButton = new JButton("Step");
+  private final JButton fasterButton;
   // JButton fasterButton = new JButton(">>");
-  JButton slowerButton; // = new JButton("<<");
-  Scalar speed = RealScalar.ONE;
-  JLabel speedLabel = new JLabel(speed.toString(), JLabel.CENTER);
-  static final int POS_MAX = 10000;
-  JLabel posLabel = new JLabel("Event 0");
-  JLabel timeLabel = new JLabel("Time 0.0s");
-  JLabel actualSpeedLabel = new JLabel("1.0x");
-  JLabel logName = new JLabel("---");
-  PlayerThread player = null;
-  LCM lcm;
+  private final JButton slowerButton; // = new JButton("<<");
+  private Scalar speed = RealScalar.ONE;
+  private final JLabel speedLabel = new JLabel(speed.toString(), JLabel.CENTER);
+  private final JLabel posLabel = new JLabel("Event 0");
+  private final JLabel timeLabel = new JLabel("Time 0.0s");
+  private final JLabel actualSpeedLabel = new JLabel("1.0x");
+  private final JLabel logName = new JLabel("---");
+  private PlayerThread player = null;
+  private LCM lcm;
   /** The time of the first event in the current log **/
-  long timeOffset = 0;
-  JFileChooser jfc = new JFileChooser();
-  String currentLogPath;
-  double total_seconds; // an estimate of how many seconds there are in the
-                        // file
-  BlockingQueue<QueuedEvent> events = new LinkedBlockingQueue<>();
-  Object sync = new Object();
+  private long timeOffset = 0;
+  private JFileChooser jfc = new JFileChooser();
+  private String currentLogPath;
+  /** an estimate of how many seconds there are in the file */
+  private double total_seconds;
+  final BlockingQueue<QueuedEvent> events = new LinkedBlockingQueue<>();
+  private final Object sync = new Object();
 
   interface QueuedEvent {
     public void execute(LogPlayer lp);
@@ -173,7 +173,7 @@ public class LogPlayer extends JComponent {
 
   Pattern filteredPattern;
   boolean invertFilteredPattern;
-  FilterTableModel filterTableModel = new FilterTableModel();
+  FilterTableModel filterTableModel = new FilterTableModel(this);
   List<Filter> filters = new ArrayList<>();
   // JTable calls upon filterTableModel which calls upon filters...
   // which needs to exist before that!
@@ -186,11 +186,11 @@ public class LogPlayer extends JComponent {
   JTextField stepChannelField = new JTextField("");
 
   // faster/slower would be better as semi-log.
-  static final Scalar slowerSpeed(Scalar v) {
+  static Scalar slowerSpeed(Scalar v) {
     return v.divide(RealScalar.of(2));
   }
 
-  static final Scalar fasterSpeed(Scalar v) {
+  static Scalar fasterSpeed(Scalar v) {
     return v.multiply(RealScalar.of(2));
   }
 
@@ -479,7 +479,7 @@ public class LogPlayer extends JComponent {
     fouts.close();
   }
 
-  Filter addChannelFilter(String channel, boolean enabledByDefault) {
+  private Filter addChannelFilter(String channel, boolean enabledByDefault) {
     Filter f = new Filter();
     f.inchannel = channel;
     f.outchannel = channel;
@@ -495,7 +495,7 @@ public class LogPlayer extends JComponent {
   }
 
   @SuppressWarnings("resource")
-  void loadPreferences(String path) throws IOException {
+  private void loadPreferences(String path) throws IOException {
     BufferedReader ins;
     js.clearBookmarks();
     filterMap.clear();
@@ -539,7 +539,7 @@ public class LogPlayer extends JComponent {
     filterTableModel.fireTableDataChanged();
   }
 
-  void populateChannelFilters() {
+  private void populateChannelFilters() {
     try {
       long logStartUTime = -1;
       while (true) {
@@ -569,7 +569,7 @@ public class LogPlayer extends JComponent {
     }
   }
 
-  void setLog(String path, boolean startPlaying) throws IOException {
+  private void setLog(String path, boolean startPlaying) throws IOException {
     if (currentLogPath != null)
       savePreferences();
     currentLogPath = path;
@@ -597,7 +597,7 @@ public class LogPlayer extends JComponent {
     }
   }
 
-  void setPlaying(boolean t) {
+  private void setPlaying(boolean t) {
     playButton.setText(t ? "Pause" : "Play");
     stepButton.setEnabled(!t);
   }
@@ -606,7 +606,7 @@ public class LogPlayer extends JComponent {
   // a potential race condition between auto-stops and requested stops.
   //
   // We protect these two with 'sync'.
-  void doStop() {
+  private void doStop() {
     PlayerThread pptr;
     synchronized (sync) {
       if (player == null)
@@ -621,21 +621,21 @@ public class LogPlayer extends JComponent {
     }
   }
 
-  void doPlay() {
+  private void doPlay() {
     if (player != null)
       return;
     player = new PlayerThread();
     player.start();
   }
 
-  void doStep() {
+  private void doStep() {
     if (player != null)
       return;
     player = new PlayerThread(stepChannelField.getText());
     player.start();
   }
 
-  void doSeek(double ratio) {
+  private void doSeek(double ratio) {
     assert (player == null);
     if (ratio < 0)
       ratio = 0;
@@ -656,7 +656,7 @@ public class LogPlayer extends JComponent {
   long lastEventTime;
   long lastSystemTime;
 
-  void updateDisplay(Log.Event e) {
+  private void updateDisplay(Log.Event e) {
     if (show_absolute_time) {
       java.text.SimpleDateFormat df = new java.text.SimpleDateFormat("yyyy.MM.dd HH:mm:ss.S z");
       Date timestamp = new Date(e.utime / 1000);
@@ -676,8 +676,8 @@ public class LogPlayer extends JComponent {
   }
 
   class PlayerThread extends Thread {
-    boolean stopflag = false;
-    String stopOnChannel;
+    private boolean stopflag = false;
+    private String stopOnChannel;
 
     public PlayerThread() {
     }
@@ -686,7 +686,7 @@ public class LogPlayer extends JComponent {
       this.stopOnChannel = stopOnChannel;
     }
 
-    public void requestStop() {
+    private void requestStop() {
       stopflag = true;
     }
 
@@ -780,75 +780,6 @@ public class LogPlayer extends JComponent {
         setPlaying(false);
         player = null;
       }
-    }
-  }
-
-  class FilterTableModel extends AbstractTableModel {
-    @Override
-    public int getRowCount() {
-      return filters.size();
-    }
-
-    @Override
-    public int getColumnCount() {
-      return 3;
-    }
-
-    @Override
-    public String getColumnName(int column) {
-      switch (column) {
-      case 0:
-        return "Log channel";
-      case 1:
-        return "Playback channel";
-      case 2:
-        return "Enable";
-      default:
-        return "??";
-      }
-    }
-
-    @Override
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public Class getColumnClass(int column) {
-      switch (column) {
-      case 0:
-      case 1:
-        return String.class;
-      case 2:
-        return Boolean.class;
-      default:
-        return null;
-      }
-    }
-
-    @Override
-    public Object getValueAt(int row, int column) {
-      Filter f = filters.get(row);
-      switch (column) {
-      case 0:
-        return f.inchannel;
-      case 1:
-        return f.outchannel;
-      case 2:
-        return f.enabled;
-      default:
-        return "??";
-      }
-    }
-
-    @Override
-    public boolean isCellEditable(int row, int column) {
-      return (column == 1) || (column == 2);
-    }
-
-    @Override
-    public void setValueAt(Object v, int row, int column) {
-      Filter f = filters.get(row);
-      if (column == 1)
-        f.outchannel = (String) v;
-      if (column == 2)
-        f.enabled = (Boolean) v;
     }
   }
 

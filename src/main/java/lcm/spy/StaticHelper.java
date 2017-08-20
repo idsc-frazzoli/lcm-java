@@ -1,3 +1,4 @@
+// code by lcm
 package lcm.spy;
 
 enum StaticHelper {

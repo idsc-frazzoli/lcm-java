@@ -1,7 +1,5 @@
 // code by jph
-package lcm.log;
-
-import lcm.logging.LogPlayer;
+package lcm.logging;
 
 enum LogPlayerDemo {
   ;

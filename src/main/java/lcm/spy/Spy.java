@@ -1,3 +1,4 @@
+// code by lcm
 package lcm.spy;
 
 import java.awt.BorderLayout;
@@ -23,6 +24,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
 import lcm.lcm.LCM;
@@ -55,14 +58,24 @@ public class Spy {
     channelTableModel.setTableHeader(channelTable.getTableHeader());
     channelTableModel.setSortingStatus(0, TableSorter.ASCENDING);
     handlers = LCMTypeDatabase.create();
-    TableColumnModel tcm = channelTable.getColumnModel();
-    tcm.getColumn(0).setMinWidth(140);
-    tcm.getColumn(1).setMinWidth(140);
-    tcm.getColumn(2).setMaxWidth(100);
-    tcm.getColumn(3).setMaxWidth(100);
-    tcm.getColumn(4).setMaxWidth(100);
-    tcm.getColumn(5).setMaxWidth(100);
-    tcm.getColumn(6).setMaxWidth(100);
+    {
+      TableColumnModel tcm = channelTable.getColumnModel();
+      DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
+      dtcr.setHorizontalAlignment(SwingConstants.RIGHT);
+      tcm.getColumn(0).setMinWidth(140);
+      tcm.getColumn(1).setMinWidth(140);
+      tcm.getColumn(2).setMaxWidth(100);
+      tcm.getColumn(2).setCellRenderer(dtcr);
+      tcm.getColumn(3).setMaxWidth(100);
+      tcm.getColumn(3).setCellRenderer(dtcr);
+      tcm.getColumn(4).setMaxWidth(100);
+      tcm.getColumn(4).setCellRenderer(dtcr);
+      tcm.getColumn(5).setMaxWidth(100);
+      tcm.getColumn(5).setCellRenderer(dtcr);
+      tcm.getColumn(6).setMaxWidth(100);
+      tcm.getColumn(6).setCellRenderer(dtcr);
+      tcm.getColumn(7).setCellRenderer(dtcr);
+    }
     jFrame = new JFrame("LCM Spy");
     jFrame.setLayout(new BorderLayout());
     jFrame.add(channelTable.getTableHeader(), BorderLayout.PAGE_START);
