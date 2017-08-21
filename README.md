@@ -33,6 +33,8 @@ Quote from [Multicast Setup](https://lcm-proj.github.io/multicast_setup.html):
 
 Remember, you must always do this to use LCM if your machine is not connected to any external network."
 
+Remark: On Mac OS when using Wifi it may be necessary to add the following `-Djava.net.preferIPv4Stack=true` into the run configuration  -> arguments -> VM arguments.
+
 ## Include in Project
 
     <dependencies>
