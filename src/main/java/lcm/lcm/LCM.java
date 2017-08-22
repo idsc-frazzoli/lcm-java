@@ -19,7 +19,7 @@ public class LCM {
 
   List<SubscriptionRecord> subscriptions = new ArrayList<>();
   List<Provider> providers = new ArrayList<>();
-  Map<String, ArrayList<SubscriptionRecord>> subscriptionsMap = new HashMap<>();
+  Map<String, List<SubscriptionRecord>> subscriptionsMap = new HashMap<>();
   boolean closed = false;
   static LCM singleton;
   LCMDataOutputStream encodeBuffer = new LCMDataOutputStream(new byte[1024]);
@@ -126,14 +126,14 @@ public class LCM {
     srec.pat = Pattern.compile(regex);
     srec.lcsub = sub;
     synchronized (this) {
-      for (Provider p : providers)
-        p.subscribe(regex);
+      for (Provider provider : providers)
+        provider.subscribe(regex);
     }
     synchronized (subscriptions) {
       subscriptions.add(srec);
       for (String channel : subscriptionsMap.keySet()) {
         if (srec.pat.matcher(channel).matches()) {
-          ArrayList<SubscriptionRecord> subs = subscriptionsMap.get(channel);
+          List<SubscriptionRecord> subs = subscriptionsMap.get(channel);
           subs.add(srec);
         }
       }
@@ -180,7 +180,7 @@ public class LCM {
     if (this.closed)
       throw new IllegalStateException();
     synchronized (subscriptions) {
-      ArrayList<SubscriptionRecord> srecs = subscriptionsMap.get(channel);
+      List<SubscriptionRecord> srecs = subscriptionsMap.get(channel);
       if (srecs == null) {
         // must build this list!
         srecs = new ArrayList<SubscriptionRecord>();
@@ -208,38 +208,10 @@ public class LCM {
     // TODO by Jen Check when should close and when should unsubscribe
     if (this.closed)
       throw new IllegalStateException();
-    for (Provider p : providers) {
-      p.close();
+    for (Provider provider : providers) {
+      provider.close();
     }
     providers = null;
     this.closed = true;
-  }
-
-  ////////////////////////////////////////////////////////////////
-  /** Minimalist test code. **/
-  public static void main(String args[]) {
-    LCM lcm;
-    try {
-      lcm = new LCM();
-    } catch (IOException ex) {
-      System.err.println("ex: " + ex);
-      return;
-    }
-    lcm.subscribeAll(new SimpleSubscriber());
-    while (true) {
-      try {
-        Thread.sleep(1000);
-        lcm.publish("TEST", "foobar");
-      } catch (Exception ex) {
-        System.err.println("ex: " + ex);
-      }
-    }
-  }
-
-  static class SimpleSubscriber implements LCMSubscriber {
-    @Override
-    public void messageReceived(LCM lcm, String channel, LCMDataInputStream dins) {
-      System.err.println("RECV: " + channel);
-    }
   }
 }
