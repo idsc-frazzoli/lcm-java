@@ -5,7 +5,7 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
-/** A message which can be easily sent using LCM. **/
+/** A message which can be easily sent using LCM. */
 public interface LCMEncodable {
   /** LCMEncodables will always have an empty constructor and a constructor
    * that takes a DataInput. **/

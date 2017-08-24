@@ -29,7 +29,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
 import lcm.lcm.LCM;
-import lcm.util.ClassDiscoverer;
+import lcm.util.ClassDiscovery;
+import lcm.util.ClassPaths;
 import lcm.util.ClassVisitor;
 import lcm.util.LcmStaticHelper;
 import lcm.util.TableSorter;
@@ -38,7 +39,7 @@ import lcm.util.TableSorter;
 // FIXME process does not terminate if object panel is opened
 public class Spy {
   LCM lcm;
-  LCMTypeDatabase handlers;
+  final LcmTypeDatabase lcmTypeDatabase; // accessed in UniversalSubscriber
   long startuTime; // time that lcm-spy started
   Map<String, ChannelData> channelMap = new HashMap<>();
   List<ChannelData> channelList = new ArrayList<>();
@@ -49,16 +50,20 @@ public class Spy {
   List<SpyPlugin> plugins = new ArrayList<>();
   JButton clearButton = new JButton("Clear");
   JFrame jFrame;
-  HzThread thread; // Added by Jen
+  HzThread hzThread; // Added by Jen
   JLabel jLabelInfo = new JLabel();
   long totalBytes = 0;
   long totalBytesRate = 0;
 
   public Spy(String lcmurl) throws IOException {
+    this(lcmurl, LcmTypeDatabaseBuilder.create(ClassPaths.getDefault()));
+  }
+
+  public Spy(String lcmurl, LcmTypeDatabase lcmTypeDatabase) throws IOException {
     // sortedChannelTableModel.addMouseListenerToHeaderInTable(channelTable);
     channelTableModel.setTableHeader(channelTable.getTableHeader());
     channelTableModel.setSortingStatus(0, TableSorter.ASCENDING);
-    handlers = LCMTypeDatabase.create();
+    this.lcmTypeDatabase = lcmTypeDatabase;
     {
       TableColumnModel tcm = channelTable.getColumnModel();
       DefaultTableCellRenderer dtcr = new DefaultTableCellRenderer();
@@ -98,8 +103,8 @@ public class Spy {
     else
       lcm = new LCM(lcmurl);
     lcm.subscribeAll(new UniversalSubscriber(this));
-    thread = new HzThread(this);
-    thread.start();
+    hzThread = new HzThread(this);
+    hzThread.start();
     clearButton.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -139,7 +144,8 @@ public class Spy {
         close(); // Added by Jen
       }
     });
-    ClassDiscoverer.findClasses(new PluginClassVisitor());
+    System.out.println("---");
+    ClassDiscovery.execute(ClassPaths.getDefault(), new PluginClassVisitor());
     System.out.println("Found " + plugins.size() + " plugins");
     for (SpyPlugin plugin : plugins) {
       System.out.println(" " + plugin);
@@ -150,9 +156,10 @@ public class Spy {
     // use try because user might close the window itself
     try {
       lcm.close(); // Added by Jen
-    } catch (Exception e) {
+    } catch (Exception exception) {
+      // ---
     }
-    thread.interrupt(); // Added by Jen
+    hzThread.interrupt(); // Added by Jen
     jFrame.setVisible(false);
     jFrame.dispose();
   }

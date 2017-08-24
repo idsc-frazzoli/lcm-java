@@ -29,7 +29,7 @@ public class ClassDump implements ClassVisitor {
     System.out.println("exporting to " + file.getAbsolutePath());
     try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file))) {
       ClassDump classDump = new ClassDump(bufferedWriter);
-      ClassDiscoverer.findClasses(classDump);
+      ClassDiscovery.execute(ClassPaths.getDefault(), classDump);
       System.out.println("found " + classDump.count + " classes");
     } catch (Exception exception) {
       exception.printStackTrace();

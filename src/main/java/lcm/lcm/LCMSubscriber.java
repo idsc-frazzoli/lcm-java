@@ -1,7 +1,7 @@
 // code by lcm
 package lcm.lcm;
 
-/** A class which listens for messages on a particular channel. **/
+/** A class which listens for messages on a particular channel. */
 public interface LCMSubscriber {
   /** Invoked by LCM when a message is received.
    *

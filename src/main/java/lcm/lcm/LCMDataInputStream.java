@@ -5,7 +5,7 @@ import java.io.DataInput;
 import java.io.EOFException;
 import java.io.IOException;
 
-/** Will not throw EOF. **/
+/** Will not throw EOF. */
 public final class LCMDataInputStream implements DataInput {
   byte buf[];
   int pos = 0; // current index into buf.

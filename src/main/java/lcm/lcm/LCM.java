@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-/** Lightweight Communications and Marshalling Java implementation **/
+/** Lightweight Communications and Marshalling Java implementation */
 public class LCM {
   static class SubscriptionRecord {
     String regex;
@@ -26,7 +26,7 @@ public class LCM {
 
   /** Create a new LCM object, connecting to one or more URLs. If no URL is
    * specified, the environment variable LCM_DEFAULT_URL is used. If that
-   * environment variable is not defined, then the default URL is used. **/
+   * environment variable is not defined, then the default URL is used. */
   public LCM(String... urls) throws IOException {
     if (urls.length == 0) {
       String env = System.getenv("LCM_DEFAULT_URL");
@@ -60,7 +60,7 @@ public class LCM {
 
   /** Retrieve a default instance of LCM using either the environment variable
    * LCM_DEFAULT_URL or the default. If an exception occurs, System.exit(-1)
-   * is called. **/
+   * is called. */
   public static LCM getSingleton() {
     if (singleton == null) {
       try {
@@ -74,7 +74,7 @@ public class LCM {
     return singleton;
   }
 
-  /** Return the number of subscriptions. **/
+  /** Return the number of subscriptions. */
   public int getNumSubscriptions() {
     if (this.closed)
       throw new IllegalStateException();
@@ -83,7 +83,7 @@ public class LCM {
 
   /** Publish a string on a channel. This method does not use the LCM type
    * definitions and thus is not type safe. This method is primarily provided
-   * for testing purposes and may be removed in the future. **/
+   * for testing purposes and may be removed in the future. */
   public void publish(String channel, String s) throws IOException {
     if (this.closed)
       throw new IllegalStateException();
@@ -117,7 +117,7 @@ public class LCM {
   }
 
   /** Subscribe to all channels whose name matches the regular expression. Note
-   * that to subscribe to all channels, you must specify ".*", not "*". **/
+   * that to subscribe to all channels, you must specify ".*", not "*". */
   public void subscribe(String regex, LCMSubscriber sub) {
     if (this.closed)
       throw new IllegalStateException();
@@ -144,7 +144,7 @@ public class LCM {
    * CHANGE). If regex is null, all subscriptions for 'sub' are cancelled. If
    * subscriber is null, any previous subscriptions matching the regular
    * expression will be cancelled. If both 'sub' and 'regex' are null, all
-   * subscriptions will be cancelled. **/
+   * subscriptions will be cancelled. */
   public void unsubscribe(String regex, LCMSubscriber sub) {
     if (this.closed)
       throw new IllegalStateException();
@@ -175,7 +175,7 @@ public class LCM {
 
   /** Not for use by end users. Provider back ends call this method when they
    * receive a message. The subscribers that match the channel name are
-   * synchronously notified. **/
+   * synchronously notified. */
   public void receiveMessage(String channel, byte data[], int offset, int length) {
     if (this.closed)
       throw new IllegalStateException();
@@ -196,7 +196,7 @@ public class LCM {
     }
   }
 
-  /** A convenience function that subscribes to all LCM channels. **/
+  /** A convenience function that subscribes to all LCM channels. */
   public synchronized void subscribeAll(LCMSubscriber sub) {
     subscribe(".*", sub);
   }
