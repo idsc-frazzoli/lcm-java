@@ -8,6 +8,7 @@ import java.awt.event.WindowEvent;
 import java.io.IOException;
 
 import javax.swing.JFrame;
+import javax.swing.WindowConstants;
 
 import lcm.util.LcmStaticHelper;
 
@@ -22,23 +23,23 @@ public class LogPlayer {
 
   private LogPlayer(LogPlayerConfig cfg) throws IOException {
     logPlayerComponent = new LogPlayerComponent(cfg.lcmurl, cfg.speed);
+    jFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     jFrame.setLayout(new BorderLayout());
     jFrame.add(logPlayerComponent, BorderLayout.CENTER);
     jFrame.pack();
     jFrame.setSize(jFrame.getWidth(), 300);
-    jFrame.setVisible(true);
     jFrame.addWindowListener(new WindowAdapter() {
       @Override
       public void windowClosing(WindowEvent e) {
         try {
           logPlayerComponent.savePreferences();
-        } catch (IOException ex) {
-          System.out.println("Couldn't save preferences: " + ex);
+        } catch (Exception exception) {
+          System.out.println("Couldn't save preferences: " + exception);
         }
-        // FIXME interrupt all threads and make a clean exit!
-        System.exit(0);
+        close();
       }
     });
+    jFrame.setVisible(true);
     if (cfg.channelFilterRegex != null)
       logPlayerComponent.setChannelFilter(cfg.channelFilterRegex);
     if (cfg.invertChannelFilter)
@@ -47,6 +48,11 @@ public class LogPlayer {
       logPlayerComponent.setLog(cfg.logFile, !cfg.startPaused);
     else
       logPlayerComponent.openDialog();
+  }
+
+  public void close() {
+    jFrame.dispose();
+    logPlayerComponent.stopThreads();
   }
 
   public static void main(String args[]) throws IOException {
