@@ -159,13 +159,12 @@ public class Spy {
 
   class PluginClassVisitor implements ClassVisitor {
     @Override
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    public void classFound(String jar, Class cls) {
-      Class interfaces[] = cls.getInterfaces();
-      for (Class iface : interfaces) {
+    public void classFound(String jar, Class<?> cls) {
+      Class<?> interfaces[] = cls.getInterfaces();
+      for (Class<?> iface : interfaces) {
         if (iface.equals(SpyPlugin.class)) {
           try {
-            Constructor c = cls.getConstructor(new Class[0]);
+            Constructor<?> c = cls.getConstructor(new Class[0]);
             SpyPlugin plugin = (SpyPlugin) c.newInstance(new Object[0]);
             plugins.add(plugin);
           } catch (Exception ex) {

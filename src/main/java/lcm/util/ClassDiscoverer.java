@@ -16,9 +16,11 @@ public class ClassDiscoverer {
     // types whose definitions are in another JAR file, create a
     // big "master" classpath that contains everything we might
     // want to load.
-    // String cp = System.getenv("CLASSPATH") + ps + System.getProperty("java.class.path");
+    URL url = ClassDiscoverer.class.getResource("/");
+    System.out.println("URL=" + url);
+    String cp = System.getenv("CLASSPATH") + ps + System.getProperty("java.class.path");
     // -- added by jw
-    String cp = System.getenv("CLASSPATH") + ps + ClassDiscoverer.class.getResource("/");
+    // String cp = System.getenv("CLASSPATH") + ps + ClassDiscoverer.class.getResource("/");
     findClasses(cp, visitor);
   }
 

@@ -29,8 +29,7 @@ public class LCMTypeDatabase implements ClassVisitor {
   }
 
   @Override
-  @SuppressWarnings("rawtypes")
-  public void classFound(String jar, Class cls) {
+  public void classFound(String jar, Class<?> cls) {
     try {
       Field[] fields = cls.getFields();
       for (Field f : fields) {
