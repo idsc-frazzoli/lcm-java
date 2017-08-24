@@ -1,4 +1,5 @@
 // code by lcm
+// adapted by jph
 package lcm.util;
 
 import java.io.File;
@@ -9,28 +10,28 @@ import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-public class ClassDiscoverer {
-  public static void findClasses(ClassVisitor visitor) {
-    String ps = System.getProperty("path.separator");
-    // In order to correctly handle types that reference other
-    // types whose definitions are in another JAR file, create a
-    // big "master" classpath that contains everything we might
-    // want to load.
-    // String cp = System.getenv("CLASSPATH") + ps + System.getProperty("java.class.path");
-    // -- added by jw
-    String cp = System.getenv("CLASSPATH") + ps + ClassDiscoverer.class.getResource("/");
-    findClasses(cp, visitor);
+public class ClassDiscovery {
+  public static void execute(String classpath, ClassVisitor classVisitor) {
+    new ClassDiscovery(classpath, classVisitor).findClasses();
   }
 
-  @SuppressWarnings("rawtypes")
-  private static void visitDirectory(ClassVisitor visitor, URLClassLoader cldr, String classpath_entry, File dir, String visiting_classpath) {
+  // ---
+  private final String classpath;
+  private final ClassVisitor classVisitor;
+
+  private ClassDiscovery(String classpath, ClassVisitor classVisitor) {
+    this.classpath = classpath;
+    this.classVisitor = classVisitor;
+  }
+
+  private void visitDirectory(URLClassLoader cldr, String classpath_entry, File dir, String visiting_classpath) {
     if (!dir.canRead())
       return;
-    for (File f : dir.listFiles()) {
-      if (!f.canRead())
+    for (File file : dir.listFiles()) {
+      if (!file.canRead())
         continue;
-      String fname = f.getName();
-      if (f.isDirectory()) {
+      String fname = file.getName();
+      if (file.isDirectory()) {
         // found a directory. recursively traverse the directory and
         // search for .class files
         if (fname.contains("."))
@@ -39,8 +40,9 @@ public class ClassDiscoverer {
         // visitDirectory(visitor, cldr, classpath_entry, f, fname +
         // ".");
         String vc = visiting_classpath.isEmpty() ? fname : visiting_classpath + "." + fname;
-        visitDirectory(visitor, cldr, classpath_entry, f, vc);
-      } else if (f.isFile() && fname.endsWith(".class")) {
+        visitDirectory(cldr, classpath_entry, file, vc);
+      } else //
+      if (file.isFile() && fname.endsWith(".class")) {
         // found a .class file. Construct its full classname and pass
         // it to the class visitor
         // Modified by Jan in order to enable nested packages
@@ -48,9 +50,9 @@ public class ClassDiscoverer {
         // fname.length()-6);
         String cn = visiting_classpath + "." + fname.substring(0, fname.length() - 6);
         try {
-          Class cls = cldr.loadClass(cn);
+          Class<?> cls = cldr.loadClass(cn);
           if (cls != null)
-            visitor.classFound(classpath_entry, cls);
+            classVisitor.classFound(classpath_entry, cls);
         } catch (Throwable ex) {
         }
       }
@@ -61,29 +63,25 @@ public class ClassDiscoverer {
    * them.
    * 
    * @param cp
-   * The colon-deliimited classpath to search **/
-  @SuppressWarnings({ "resource", "rawtypes" })
-  public static void findClasses(String cp, ClassVisitor visitor) {
-    if (cp == null)
-      return;
-    String ps = System.getProperty("path.separator");
-    String[] items = cp.split(ps);
+   * The colon-deliimited classpath to search */
+  private void findClasses() {
+    final String ps = System.getProperty("path.separator");
+    String[] items = classpath.split(ps);
     // Create a class loader that has access to the whole class path.
     URLClassLoader cldr;
     try {
       URL[] urls = new URL[items.length];
-      for (int i = 0; i < items.length; i++)
+      for (int i = 0; i < items.length; ++i)
         urls[i] = new File(items[i]).toURI().toURL();
       cldr = new URLClassLoader(urls);
     } catch (IOException ex) {
       System.out.println("ClassDiscoverer ERR: " + ex);
       return;
     }
-    for (int i = 0; i < items.length; i++) {
+    for (int i = 0; i < items.length; ++i) {
       String item = items[i];
       if (item.endsWith(".jar")) {
-        try {
-          JarFile jf = new JarFile(item);
+        try (JarFile jf = new JarFile(item)) {
           for (Enumeration<JarEntry> e = jf.entries(); e.hasMoreElements();) {
             JarEntry je = e.nextElement();
             String n = je.getName();
@@ -97,10 +95,10 @@ public class ClassDiscoverer {
               cn = cn.replace('\\', '.');
               // try loading that class
               try {
-                Class cls = cldr.loadClass(cn);
+                Class<?> cls = cldr.loadClass(cn);
                 if (cls == null)
                   continue;
-                visitor.classFound(item, cls);
+                classVisitor.classFound(item, cls);
               } catch (Throwable ex) {
                 // System.out.println("ClassDiscoverer: "+ex);
                 // System.out.println(" jar: "+item);
@@ -112,23 +110,22 @@ public class ClassDiscoverer {
           System.out.println("Error extracting " + items[i]);
         }
       } else {
-        File f = new File(item);
-        if (!f.isDirectory())
+        File file = new File(item);
+        if (!file.isDirectory())
           continue;
-        visitDirectory(visitor, cldr, item, f, "");
+        visitDirectory(cldr, item, file, "");
       }
     }
   }
 
   // Just list every class that we can find!
   public static void main(String args[]) {
-    ClassVisitor cv = new ClassVisitor() {
+    ClassVisitor classVisitor = new ClassVisitor() {
       @Override
-      @SuppressWarnings("rawtypes")
-      public void classFound(String jarfile, Class cls) {
+      public void classFound(String jarfile, Class<?> cls) {
         System.out.printf("%-30s %s\n", jarfile, cls);
       }
     };
-    ClassDiscoverer.findClasses(cv);
+    ClassDiscovery.execute(ClassPaths.getDefault(), classVisitor);
   }
 }

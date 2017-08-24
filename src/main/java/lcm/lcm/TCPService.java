@@ -201,7 +201,7 @@ public class TCPService {
 
   public static void main(String args[]) {
     try {
-      int port = 7700;
+      int port = TCPProvider.DEFAULT_PORT;
       if (args.length > 0)
         port = Integer.parseInt(args[0]);
       new TCPService(port);

@@ -23,8 +23,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Inet4Address;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -80,6 +78,20 @@ public class LogPlayerComponent extends JComponent {
   private double total_seconds;
   final BlockingQueue<QueuedEvent> events = new LinkedBlockingQueue<>();
   private final Object sync = new Object();
+  private boolean isLaunched = true;
+  private Pattern filteredPattern;
+  private boolean invertFilteredPattern;
+  private final FilterTableModel filterTableModel = new FilterTableModel(this);
+  final List<Filter> filters = new ArrayList<>();
+  // JTable calls upon filterTableModel which calls upon filters...
+  // which needs to exist before that!
+  private final JTable filterTable = new JTable(filterTableModel);
+  private final Map<String, Filter> filterMap = new HashMap<>();
+  private final JScrubber js = new JScrubber();
+  private boolean show_absolute_time = false;
+  private final JTextField stepChannelField = new JTextField("");
+  private QueueThread queueThread;
+  private UDPThread udpThread;
 
   interface QueuedEvent {
     public void execute(LogPlayerComponent lp);
@@ -88,11 +100,12 @@ public class LogPlayerComponent extends JComponent {
   class QueueThread extends Thread {
     @Override
     public void run() {
-      while (true) {
+      while (isLaunched) {
         try {
-          QueuedEvent qe = events.take();
-          qe.execute(LogPlayerComponent.this);
+          QueuedEvent queuedEvent = events.take();
+          queuedEvent.execute(LogPlayerComponent.this);
         } catch (InterruptedException ex) {
+          // ---
         }
       }
     }
@@ -166,18 +179,6 @@ public class LogPlayerComponent extends JComponent {
       return inchannel.compareTo(filter.inchannel);
     }
   }
-
-  private Pattern filteredPattern;
-  private boolean invertFilteredPattern;
-  private final FilterTableModel filterTableModel = new FilterTableModel(this);
-  final List<Filter> filters = new ArrayList<>();
-  // JTable calls upon filterTableModel which calls upon filters...
-  // which needs to exist before that!
-  private final JTable filterTable = new JTable(filterTableModel);
-  private final Map<String, Filter> filterMap = new HashMap<>();
-  private final JScrubber js = new JScrubber();
-  private boolean show_absolute_time = false;
-  private final JTextField stepChannelField = new JTextField("");
 
   // faster/slower would be better as semi-log.
   private static Scalar slowerSpeed(Scalar v) {
@@ -338,8 +339,23 @@ public class LogPlayerComponent extends JComponent {
     js.addScrubberListener(new MyScrubberListener());
     filterTable.getColumnModel().getColumn(2).setMaxWidth(50);
     playButton.setEnabled(false);
-    new UDPThread().start();
-    new QueueThread().start();
+    // ---
+    //
+    queueThread = new QueueThread();
+    queueThread.start();
+  }
+
+  public void startRemoteControl() {
+    udpThread = new UDPThread();
+    udpThread.start();
+  }
+
+  public void stopThreads() {
+    isLaunched = false;
+    // udpThread.interrupt();
+    queueThread.interrupt();
+    if (player != null)
+      player.requestStop();
   }
 
   class MyScrubberListener implements JScrubberListener {
@@ -382,50 +398,44 @@ public class LogPlayerComponent extends JComponent {
   // remote control via UDP packets
   class UDPThread extends Thread {
     @Override
-    @SuppressWarnings("resource")
     public void run() {
-      DatagramSocket datagramSocket;
       DatagramPacket datagramPacket = new DatagramPacket(new byte[1024], 1024);
-      try {
-        datagramSocket = new DatagramSocket(53261, Inet4Address.getByName("127.0.0.1"));
-      } catch (SocketException ex) {
-        System.out.println("Exception: " + ex);
-        return;
-      } catch (UnknownHostException ex) {
-        System.out.println("Exception: " + ex);
-        return;
-      }
-      while (true) {
-        try {
-          datagramSocket.receive(datagramPacket);
-          String cmd = new String(datagramPacket.getData(), 0, datagramPacket.getLength());
-          cmd = cmd.trim();
-          if (cmd.equals("PLAYPAUSETOGGLE")) {
-            events.offer(new PlayPauseEvent());
-          } else if (cmd.equals("PLAY")) {
-            events.offer(new PlayPauseEvent(true));
-          } else if (cmd.equals("PAUSE")) {
-            events.offer(new PlayPauseEvent(false));
-          } else if (cmd.equals("STEP")) {
-            events.offer(new StepEvent());
-          } else if (cmd.equals("FASTER")) {
-            setSpeed(fasterSpeed(speed));
-          } else if (cmd.equals("SLOWER")) {
-            setSpeed(slowerSpeed(speed));
-          } else if (cmd.startsWith("BACK")) {
-            double seconds = Double.parseDouble(cmd.substring(4));
-            double pos = log.getPositionFraction() - seconds / total_seconds;
-            events.offer(new SeekEvent(pos));
-          } else if (cmd.startsWith("FORWARD")) {
-            double seconds = Double.parseDouble(cmd.substring(7));
-            double pos = log.getPositionFraction() + seconds / total_seconds;
-            events.offer(new SeekEvent(pos));
-          } else {
-            System.out.println("Unknown remote command: " + cmd);
+      try (DatagramSocket datagramSocket = new DatagramSocket(53261, Inet4Address.getByName("127.0.0.1"))) {
+        while (isLaunched) {
+          try {
+            datagramSocket.receive(datagramPacket);
+            String cmd = new String(datagramPacket.getData(), 0, datagramPacket.getLength());
+            cmd = cmd.trim();
+            if (cmd.equals("PLAYPAUSETOGGLE")) {
+              events.offer(new PlayPauseEvent());
+            } else if (cmd.equals("PLAY")) {
+              events.offer(new PlayPauseEvent(true));
+            } else if (cmd.equals("PAUSE")) {
+              events.offer(new PlayPauseEvent(false));
+            } else if (cmd.equals("STEP")) {
+              events.offer(new StepEvent());
+            } else if (cmd.equals("FASTER")) {
+              setSpeed(fasterSpeed(speed));
+            } else if (cmd.equals("SLOWER")) {
+              setSpeed(slowerSpeed(speed));
+            } else if (cmd.startsWith("BACK")) {
+              double seconds = Double.parseDouble(cmd.substring(4));
+              double pos = log.getPositionFraction() - seconds / total_seconds;
+              events.offer(new SeekEvent(pos));
+            } else if (cmd.startsWith("FORWARD")) {
+              double seconds = Double.parseDouble(cmd.substring(7));
+              double pos = log.getPositionFraction() + seconds / total_seconds;
+              events.offer(new SeekEvent(pos));
+            } else {
+              System.out.println("Unknown remote command: " + cmd);
+            }
+          } catch (IOException ex) {
           }
-        } catch (IOException ex) {
         }
+      } catch (Exception ex) {
+        ex.printStackTrace();
       }
+      System.out.println("udp thread exit");
     }
   }
 
@@ -537,13 +547,12 @@ public class LogPlayerComponent extends JComponent {
   private void populateChannelFilters() {
     try {
       long logStartUTime = -1;
-      while (true) {
+      while (isLaunched) {
         Log.Event e = log.readNext();
         if (logStartUTime < 0)
           logStartUTime = e.utime;
-        if (e.utime - logStartUTime > 30 * 1e6) { // only scan through
-                                                  // the first 30sec of
-                                                  // the log
+        // only scan through the first 30sec of the log
+        if (e.utime - logStartUTime > 30 * 1e6) {
           break;
         }
         Filter f = filterMap.get(e.channel);
@@ -681,7 +690,7 @@ public class LogPlayerComponent extends JComponent {
       this.stopOnChannel = stopOnChannel;
     }
 
-    private void requestStop() {
+    void requestStop() {
       stopflag = true;
     }
 

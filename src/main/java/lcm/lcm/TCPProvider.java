@@ -22,28 +22,29 @@ import java.util.Set;
  * context (i.e., play back the log as fast as possible, but without dropping
  * anything). **/
 public class TCPProvider implements Provider {
-  LCM lcm;
-  static final int DEFAULT_PORT = 7700;
-  static final String DEFAULT_NETWORK = "127.0.0.1:7700";
-  InetAddress inetAddr;
-  int inetPort;
-  TCPThread tcp;
-  public static final int MAGIC_SERVER = 0x287617fa; // first word sent by
-                                                     // server
-  public static final int MAGIC_CLIENT = 0x287617fb; // first word sent by
-                                                     // client
+  public static final int DEFAULT_PORT = 7700;
+  public static final String DEFAULT_NETWORK = "127.0.0.1:7700";
+  /** first word sent by server */
+  public static final int MAGIC_SERVER = 0x287617fa;
+  /** first word sent by client */
+  public static final int MAGIC_CLIENT = 0x287617fb;
   public static final int VERSION = 0x0100; // what version do we implement?
   public static final int MESSAGE_TYPE_PUBLISH = 1;
   public static final int MESSAGE_TYPE_SUBSCRIBE = 2;
   public static final int MESSAGE_TYPE_UNSUBSCRIBE = 3;
-  Set<String> subscriptions = new HashSet<>();
+  // ---
+  private final LCM lcm;
+  private InetAddress inetAddr;
+  private int inetPort;
+  private TCPThread tcp;
+  private final Set<String> subscriptions = new HashSet<>();
 
   public TCPProvider(LCM lcm, URLParser up) throws IOException {
     this.lcm = lcm;
     String addrport[] = up.get("network", DEFAULT_NETWORK).split(":");
     if (addrport.length == 1) {
       inetAddr = InetAddress.getByName(addrport[0]);
-      inetPort = 7700;
+      inetPort = DEFAULT_PORT;
     } else if (addrport.length == 2) {
       inetAddr = InetAddress.getByName(addrport[0]);
       inetPort = Integer.valueOf(addrport[1]);

@@ -3,6 +3,7 @@ package lcm.logging;
 
 import java.io.IOException;
 
+// TODO now only available as command line tool
 public class LogDiagnostic {
   public static void main(String args[]) {
     try {

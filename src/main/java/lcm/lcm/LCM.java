@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-/** Lightweight Communications and Marshalling Java implementation **/
+/** Lightweight Communications and Marshalling Java implementation */
 public class LCM {
   static class SubscriptionRecord {
     String regex;
@@ -19,14 +19,14 @@ public class LCM {
 
   List<SubscriptionRecord> subscriptions = new ArrayList<>();
   List<Provider> providers = new ArrayList<>();
-  Map<String, ArrayList<SubscriptionRecord>> subscriptionsMap = new HashMap<>();
+  Map<String, List<SubscriptionRecord>> subscriptionsMap = new HashMap<>();
   boolean closed = false;
   static LCM singleton;
   LCMDataOutputStream encodeBuffer = new LCMDataOutputStream(new byte[1024]);
 
   /** Create a new LCM object, connecting to one or more URLs. If no URL is
    * specified, the environment variable LCM_DEFAULT_URL is used. If that
-   * environment variable is not defined, then the default URL is used. **/
+   * environment variable is not defined, then the default URL is used. */
   public LCM(String... urls) throws IOException {
     if (urls.length == 0) {
       String env = System.getenv("LCM_DEFAULT_URL");
@@ -60,7 +60,7 @@ public class LCM {
 
   /** Retrieve a default instance of LCM using either the environment variable
    * LCM_DEFAULT_URL or the default. If an exception occurs, System.exit(-1)
-   * is called. **/
+   * is called. */
   public static LCM getSingleton() {
     if (singleton == null) {
       try {
@@ -74,7 +74,7 @@ public class LCM {
     return singleton;
   }
 
-  /** Return the number of subscriptions. **/
+  /** Return the number of subscriptions. */
   public int getNumSubscriptions() {
     if (this.closed)
       throw new IllegalStateException();
@@ -83,7 +83,7 @@ public class LCM {
 
   /** Publish a string on a channel. This method does not use the LCM type
    * definitions and thus is not type safe. This method is primarily provided
-   * for testing purposes and may be removed in the future. **/
+   * for testing purposes and may be removed in the future. */
   public void publish(String channel, String s) throws IOException {
     if (this.closed)
       throw new IllegalStateException();
@@ -117,7 +117,7 @@ public class LCM {
   }
 
   /** Subscribe to all channels whose name matches the regular expression. Note
-   * that to subscribe to all channels, you must specify ".*", not "*". **/
+   * that to subscribe to all channels, you must specify ".*", not "*". */
   public void subscribe(String regex, LCMSubscriber sub) {
     if (this.closed)
       throw new IllegalStateException();
@@ -126,14 +126,14 @@ public class LCM {
     srec.pat = Pattern.compile(regex);
     srec.lcsub = sub;
     synchronized (this) {
-      for (Provider p : providers)
-        p.subscribe(regex);
+      for (Provider provider : providers)
+        provider.subscribe(regex);
     }
     synchronized (subscriptions) {
       subscriptions.add(srec);
       for (String channel : subscriptionsMap.keySet()) {
         if (srec.pat.matcher(channel).matches()) {
-          ArrayList<SubscriptionRecord> subs = subscriptionsMap.get(channel);
+          List<SubscriptionRecord> subs = subscriptionsMap.get(channel);
           subs.add(srec);
         }
       }
@@ -144,7 +144,7 @@ public class LCM {
    * CHANGE). If regex is null, all subscriptions for 'sub' are cancelled. If
    * subscriber is null, any previous subscriptions matching the regular
    * expression will be cancelled. If both 'sub' and 'regex' are null, all
-   * subscriptions will be cancelled. **/
+   * subscriptions will be cancelled. */
   public void unsubscribe(String regex, LCMSubscriber sub) {
     if (this.closed)
       throw new IllegalStateException();
@@ -175,12 +175,12 @@ public class LCM {
 
   /** Not for use by end users. Provider back ends call this method when they
    * receive a message. The subscribers that match the channel name are
-   * synchronously notified. **/
+   * synchronously notified. */
   public void receiveMessage(String channel, byte data[], int offset, int length) {
     if (this.closed)
       throw new IllegalStateException();
     synchronized (subscriptions) {
-      ArrayList<SubscriptionRecord> srecs = subscriptionsMap.get(channel);
+      List<SubscriptionRecord> srecs = subscriptionsMap.get(channel);
       if (srecs == null) {
         // must build this list!
         srecs = new ArrayList<SubscriptionRecord>();
@@ -196,7 +196,7 @@ public class LCM {
     }
   }
 
-  /** A convenience function that subscribes to all LCM channels. **/
+  /** A convenience function that subscribes to all LCM channels. */
   public synchronized void subscribeAll(LCMSubscriber sub) {
     subscribe(".*", sub);
   }
@@ -208,38 +208,10 @@ public class LCM {
     // TODO by Jen Check when should close and when should unsubscribe
     if (this.closed)
       throw new IllegalStateException();
-    for (Provider p : providers) {
-      p.close();
+    for (Provider provider : providers) {
+      provider.close();
     }
     providers = null;
     this.closed = true;
-  }
-
-  ////////////////////////////////////////////////////////////////
-  /** Minimalist test code. **/
-  public static void main(String args[]) {
-    LCM lcm;
-    try {
-      lcm = new LCM();
-    } catch (IOException ex) {
-      System.err.println("ex: " + ex);
-      return;
-    }
-    lcm.subscribeAll(new SimpleSubscriber());
-    while (true) {
-      try {
-        Thread.sleep(1000);
-        lcm.publish("TEST", "foobar");
-      } catch (Exception ex) {
-        System.err.println("ex: " + ex);
-      }
-    }
-  }
-
-  static class SimpleSubscriber implements LCMSubscriber {
-    @Override
-    public void messageReceived(LCM lcm, String channel, LCMDataInputStream dins) {
-      System.err.println("RECV: " + channel);
-    }
   }
 }

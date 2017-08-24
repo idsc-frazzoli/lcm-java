@@ -19,7 +19,7 @@ class UniversalSubscriber implements LCMSubscriber {
   }
 
   @Override
-  @SuppressWarnings({ "rawtypes", "unchecked" })
+  @SuppressWarnings("unchecked")
   public void messageReceived(LCM lcm, String channel, LCMDataInputStream dins) {
     Object object = null;
     ChannelData cd = this.spy.channelMap.get(channel);
@@ -28,7 +28,7 @@ class UniversalSubscriber implements LCMSubscriber {
       msg_size = dins.available();
       long fingerprint = (msg_size >= 8) ? dins.readLong() : -1;
       dins.reset();
-      Class cls = this.spy.handlers.getClassByFingerprint(fingerprint);
+      Class<?> cls = spy.lcmTypeDatabase.getClassByFingerprint(fingerprint);
       if (cd == null) {
         cd = new ChannelData();
         cd.name = channel;
