@@ -9,8 +9,9 @@ import lcm.util.BufferedRandomAccessFile;
 
 /** A class for reading and writing LCM log files. */
 public class Log {
-  private final BufferedRandomAccessFile raf;
   static final int LOG_MAGIC = 0xEDA1DA01;
+  // ---
+  private final BufferedRandomAccessFile raf;
   String path;
   /* Used to count the number of messages written so far. */
   long numMessagesWritten = 0;
