@@ -6,17 +6,17 @@ import java.io.IOException;
 import lcm.logging.Log;
 
 public class LogFileProvider implements Provider {
-  LCM lcm;
-  Log log;
-  double speed; // how fast do we play? <=0 for "as fast as possible"
-  double delay; // how many seconds to delay before starting to play? (crude
-                // race-condition hack)
+  private LCM lcm;
+  private Log log;
+  private double speed; // how fast do we play? <=0 for "as fast as possible"
+  private double delay; // how many seconds to delay before starting to play? (crude
+  // race-condition hack)
   boolean verbose; // report actual speed periodically
   double skip; // skip a fraction of the log file [0, 1.0]
   boolean writemode;
   long nanotime_start;
   long utime_start;
-  ReaderThread reader;
+  private ReaderThread reader;
 
   public LogFileProvider(LCM lcm, URLParser up) throws IOException {
     this.lcm = lcm;
@@ -95,7 +95,7 @@ public class LogFileProvider implements Provider {
       try {
         runEx();
       } catch (InterruptedException ex) {
-        return;
+        // ---
       } catch (IOException ex) {
         ex.printStackTrace();
       }
@@ -108,8 +108,7 @@ public class LogFileProvider implements Provider {
       Thread.sleep((int) (delay * 1000));
       long lastLocalUtime = System.nanoTime() / 1000;
       long lastEventUtime = -1;
-      double delayAccumulator = 0; // how long do we need to delay in real
-                                   // time?
+      double delayAccumulator = 0; // how long do we need to delay in real time?
       double verboseAccumulator = 0;
       long verboseLastEventUtime = -1;
       while (true) {

@@ -28,6 +28,7 @@ public class BufferedRandomAccessFile {
    * This position is always stored inside the buffer, or this position is the
    * byte after the current buffer (in which case the next read will re-fill
    * the buffer. */
+  // TODO one of the constructors is obsolete
   public BufferedRandomAccessFile(File file, String mode) throws IOException {
     raf = new RandomAccessFile(file, mode);
     fileLength = raf.length();
@@ -53,7 +54,7 @@ public class BufferedRandomAccessFile {
     return fileLength;
   }
 
-  long min(long a, long b) {
+  private static long min(long a, long b) {
     return a < b ? a : b;
   }
 
