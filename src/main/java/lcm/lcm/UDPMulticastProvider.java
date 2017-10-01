@@ -24,6 +24,10 @@ public class UDPMulticastProvider implements Provider {
   static final int MAGIC_SHORT = 0x4c433032; // ascii of "LC02"
   static final int MAGIC_LONG = 0x4c433033; // ascii of "LC03"
   static final int FRAGMENTATION_THRESHOLD = 64000;
+  static {
+    System.setProperty("java.net.preferIPv4Stack", "true");
+    System.err.println("LCM: Disabling IPV6 support");
+  }
   // ---
   private MulticastSocket sock;
   private ReaderThread reader;
@@ -32,10 +36,6 @@ public class UDPMulticastProvider implements Provider {
   private LCM lcm;
   private InetAddress inetAddr;
   private int inetPort;
-  static {
-    System.setProperty("java.net.preferIPv4Stack", "true");
-    System.err.println("LCM: Disabling IPV6 support");
-  }
 
   public UDPMulticastProvider(LCM lcm, URLParser up) throws IOException {
     this.lcm = lcm;
@@ -53,7 +53,13 @@ public class UDPMulticastProvider implements Provider {
     else
       System.err.println("LCM: TTL set to 1.");
     sock.setTimeToLive(up.get("ttl", DEFAULT_TTL));
-    sock.joinGroup(inetAddr);
+    try {
+      sock.joinGroup(inetAddr);
+    } catch (Exception exception) {
+      System.out.println(TroubleShooter.joinGroup());
+      System.out.flush();
+      throw exception;
+    }
   }
 
   @Override
@@ -223,11 +229,9 @@ public class UDPMulticastProvider implements Provider {
       if (null == fbuf && 0 == fragment_id) {
         // extract channel name
         int channel_len = 0;
-        for (; channel_len < payload.length; channel_len++) {
-          if (0 == payload[channel_len]) {
+        for (; channel_len < payload.length; channel_len++)
+          if (0 == payload[channel_len])
             break;
-          }
-        }
         data_start = channel_len + 1;
         frag_size -= channel_len + 1;
         String channel = new String(payload, 0, channel_len, "US-ASCII");
@@ -263,7 +267,6 @@ public class UDPMulticastProvider implements Provider {
         handleFragment(packet, ins);
       } else {
         System.err.println("bad magic: " + Integer.toHexString(magic));
-        return;
       }
     }
   }

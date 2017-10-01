@@ -294,44 +294,24 @@ public class LogPlayerComponent extends JComponent {
         GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 5, 0, 5), 0, 0));
     // position.addChangeListener(new MyChangeListener());
     setPlaying(false);
-    fasterButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        setSpeed(fasterSpeed(speed));
-      }
-    });
-    slowerButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        setSpeed(slowerSpeed(speed));
-      }
-    });
-    playButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        events.offer(new PlayPauseEvent());
-      }
-    });
-    stepButton.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        events.offer(new StepEvent());
-      }
-    });
+    fasterButton.addActionListener(e -> setSpeed(fasterSpeed(speed)));
+    slowerButton.addActionListener(e -> setSpeed(slowerSpeed(speed)));
+    playButton.addActionListener(e -> events.offer(new PlayPauseEvent()));
+    stepButton.addActionListener(e -> events.offer(new StepEvent()));
     if (null == lcmurl)
       lcm = new LCM();
     else
       lcm = new LCM(lcmurl);
     logName.addMouseListener(new MouseAdapter() {
       @Override
-      public void mouseClicked(MouseEvent e) {
-        if (e.getClickCount() == 2)
+      public void mouseClicked(MouseEvent mouseEvent) {
+        if (mouseEvent.getClickCount() == 2)
           openDialog();
       }
     });
     timeLabel.addMouseListener(new MouseAdapter() {
       @Override
-      public void mouseClicked(MouseEvent e) {
+      public void mouseClicked(MouseEvent mouseEvent) {
         show_absolute_time = !show_absolute_time;
       }
     });

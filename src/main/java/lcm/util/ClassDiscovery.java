@@ -59,11 +59,7 @@ public class ClassDiscovery {
     }
   }
 
-  /** Given a colon-delimited list of jar files, iterate over the classes in
-   * them.
-   * 
-   * @param cp
-   * The colon-deliimited classpath to search */
+  /** Given a colon-delimited list of jar files, iterate over the classes in them. */
   private void findClasses() {
     final String ps = System.getProperty("path.separator");
     String[] items = classpath.split(ps);
@@ -116,16 +112,5 @@ public class ClassDiscovery {
         visitDirectory(cldr, item, file, "");
       }
     }
-  }
-
-  // Just list every class that we can find!
-  public static void main(String args[]) {
-    ClassVisitor classVisitor = new ClassVisitor() {
-      @Override
-      public void classFound(String jarfile, Class<?> cls) {
-        System.out.printf("%-30s %s\n", jarfile, cls);
-      }
-    };
-    ClassDiscovery.execute(ClassPaths.getDefault(), classVisitor);
   }
 }

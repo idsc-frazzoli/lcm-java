@@ -18,7 +18,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.event.MouseInputAdapter;
 
-public class JScrubber extends JComponent {
+class JScrubber extends JComponent {
   static final int BARHEIGHT = 5;
   static final int KNOBSIZE = 10;
   static final int MARGIN = 10;

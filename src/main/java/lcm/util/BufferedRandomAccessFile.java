@@ -1,4 +1,5 @@
 // code by lcm
+// modifications by jph
 package lcm.util;
 
 import java.io.EOFException;
@@ -6,6 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
+/** implementation is standalone */
 public class BufferedRandomAccessFile {
   private static final int BUFFER_SIZE = 32768; // must be power of two!
   // ---
@@ -25,7 +27,8 @@ public class BufferedRandomAccessFile {
   /** Invariant: the current file position = bufferOffset + bufferPosition.
    * This position is always stored inside the buffer, or this position is the
    * byte after the current buffer (in which case the next read will re-fill
-   * the buffer. **/
+   * the buffer. */
+  // TODO one of the constructors is obsolete
   public BufferedRandomAccessFile(File file, String mode) throws IOException {
     raf = new RandomAccessFile(file, mode);
     fileLength = raf.length();
@@ -51,15 +54,7 @@ public class BufferedRandomAccessFile {
     return fileLength;
   }
 
-  int max(int a, int b) {
-    return a > b ? a : b;
-  }
-
-  long max(long a, long b) {
-    return a > b ? a : b;
-  }
-
-  long min(long a, long b) {
+  private static long min(long a, long b) {
     return a < b ? a : b;
   }
 
@@ -71,7 +66,7 @@ public class BufferedRandomAccessFile {
     flushBuffer();
   }
 
-  /** Writes the buffer if it contains any dirty data **/
+  /** Writes the buffer if it contains any dirty data */
   void flushBuffer() throws IOException {
     if (!bufferDirty)
       return;
@@ -226,43 +221,8 @@ public class BufferedRandomAccessFile {
     return Double.longBitsToDouble(readLong());
   }
 
-  @SuppressWarnings("unused")
-  public void writeUTF(String s) throws IOException {
-    writeShort((short) s.length());
-    for (int i = 0; i < s.length(); i++) {
-      char c = s.charAt(i);
-      // XXX BUG, not compliant with DataOutput
-      write(s.charAt(i) & 0xff);
-    }
-  }
-
-  public String readUTF() throws IOException {
-    // XXX BUG, not compliant with DataInput
-    int length = readShort();
-    StringBuffer sb = new StringBuffer(length);
-    for (int i = 0; i < length; i++) {
-      sb.append((char) read());
-    }
-    return sb.toString();
-  }
-
-  /* public void write(byte src[], int offset, int writelen) throws
-   * IOException { bufferDirty = true;
-   * 
-   * while (writelen > 0) { if (bufferPosition == BUFFER_SIZE) flushBuffer();
-   * 
-   * // how many bytes of this write will fit in the current buffer? long
-   * copylen = min(writelen, BUFFER_SIZE - bufferPosition);
-   * System.arraycopy(src, offset, buffer, bufferPosition, (int) copylen);
-   * bufferPosition += copylen;
-   * 
-   * // have we made the file longer? if (bufferPosition > bufferLength) {
-   * length += bufferPosition - bufferLength; bufferLength = bufferPosition; }
-   * 
-   * // get ready for the next copy writelen -= copylen; offset += copylen; }
-   * } */
   public void write(byte src[], int offset, int writelen) throws IOException {
-    for (int i = offset; i < offset + writelen; i++)
+    for (int i = offset; i < offset + writelen; ++i)
       write(src[i]);
   }
 
@@ -285,78 +245,5 @@ public class BufferedRandomAccessFile {
     flushBuffer();
     bufferSeek(bufferOffset + bufferPosition);
     write(v);
-  }
-
-  public static boolean check;
-
-  public String readLineCheck() throws IOException {
-    if (!check)
-      return readLine();
-    raf.seek(bufferOffset + bufferPosition);
-    String s2 = raf.readLine();
-    String s1 = readLine();
-    System.out.println("braf: " + s1);
-    System.out.println(" raf: " + s2);
-    return s1;
-  }
-
-  @SuppressWarnings("unused")
-  public String readLine() throws IOException {
-    StringBuilder sb = null;
-    while (true) {
-      int buffstart = bufferPosition;
-      String piece = null;
-      // suck as much out of this buffer as we can
-      while (bufferPosition < bufferLength) {
-        char c = (char) (buffer[bufferPosition++] & 0xff);
-        if (c == '\n') {
-          piece = new String(buffer, buffstart, bufferPosition - buffstart - 1);
-          break;
-        }
-        if (c == '\r') {
-          piece = new String(buffer, buffstart, bufferPosition - buffstart - 1);
-          // this logic is untested.
-          if (false && bufferPosition + bufferPosition < fileLength) {
-            // consume \r\n if it appears
-            if (peek() == '\n')
-              read();
-          }
-          break;
-        }
-      }
-      // if a piece has been created, then we have found a newline
-      if (piece != null) {
-        if (sb == null)
-          return piece;
-        sb.append(piece);
-        return sb.toString();
-      }
-      piece = new String(buffer, buffstart, bufferPosition - buffstart);
-      if (sb == null)
-        sb = new StringBuilder();
-      sb.append(piece);
-      // EOF?
-      if (bufferOffset + bufferPosition >= fileLength) {
-        // return the string so far...
-        if (sb.length() > 0) {
-          return sb.toString();
-        } else
-          return null; // EOF!
-      }
-      bufferSeek(bufferOffset + bufferPosition);
-    }
-  }
-
-  public static void main(String args[]) {
-    try {
-      BufferedRandomAccessFile in = new BufferedRandomAccessFile(args[0], "r");
-      // BufferedRandomAccessFile out = new
-      // BufferedRandomAccessFile(args[1]);
-      String l;
-      while ((l = in.readLine()) != null)
-        System.out.printf("^%s$\n", l);
-    } catch (IOException ex) {
-      System.out.println("Ex: " + ex);
-    }
   }
 }

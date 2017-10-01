@@ -9,9 +9,10 @@ import lcm.util.BufferedRandomAccessFile;
 
 /** A class for reading and writing LCM log files. */
 public class Log {
-  private final BufferedRandomAccessFile raf;
   static final int LOG_MAGIC = 0xEDA1DA01;
-  String path;
+  // ---
+  private final BufferedRandomAccessFile raf;
+  private final String path;
   /* Used to count the number of messages written so far. */
   long numMessagesWritten = 0;
 
@@ -39,7 +40,6 @@ public class Log {
   public Log(String path, String mode) throws IOException {
     this.path = path;
     raf = new BufferedRandomAccessFile(path, mode);
-    // raf = new RandomAccessFile(path, mode);
   }
 
   /** Retrieves the path to the log file.
@@ -60,30 +60,30 @@ public class Log {
    * if the end of the file has been reached. */
   public synchronized Event readNext() throws IOException {
     int magic = 0;
-    Event e = new Event();
+    Event event = new Event();
     int channellen = 0, datalen = 0;
     while (true) {
-      int v = raf.readByte() & 0xff;
+      int v = raf.readByte() & 0xff; // typically the cause of an exception at EOF
       magic = (magic << 8) | v;
       if (magic != LOG_MAGIC)
         continue;
-      e.eventNumber = raf.readLong();
-      e.utime = raf.readLong();
+      event.eventNumber = raf.readLong();
+      event.utime = raf.readLong();
       channellen = raf.readInt();
       datalen = raf.readInt();
       if (channellen <= 0 || datalen <= 0 || channellen >= 256 || datalen >= 16 * 1024 * 1024) {
-        System.out.printf("Bad log event eventnumber = 0x%08x utime = 0x%08x channellen = 0x%08x datalen=0x%08x\n", e.eventNumber, e.utime, channellen,
+        System.out.printf("Bad log event eventnumber = 0x%08x utime = 0x%08x channellen = 0x%08x datalen=0x%08x\n", event.eventNumber, event.utime, channellen,
             datalen);
         continue;
       }
       break;
     }
     byte bchannel[] = new byte[channellen];
-    e.data = new byte[datalen];
+    event.data = new byte[datalen];
     raf.readFully(bchannel);
-    e.channel = new String(bchannel);
-    raf.readFully(e.data);
-    return e;
+    event.channel = new String(bchannel);
+    raf.readFully(event.data);
+    return event;
   }
 
   public synchronized double getPositionFraction() throws IOException {
@@ -101,15 +101,15 @@ public class Log {
   /** Writes an event to the log file. The user is responsible for filling in
    * the eventNumber field, which should be sequentially increasing integers
    * starting with 0. */
-  public synchronized void write(Event e) throws IOException {
-    byte[] channelb = e.channel.getBytes();
+  public synchronized void write(Event event) throws IOException {
+    byte[] channelb = event.channel.getBytes();
     raf.writeInt(LOG_MAGIC);
-    raf.writeLong(e.eventNumber);
-    raf.writeLong(e.utime);
+    raf.writeLong(event.eventNumber);
+    raf.writeLong(event.utime);
     raf.writeInt(channelb.length);
-    raf.writeInt(e.data.length);
+    raf.writeInt(event.data.length);
     raf.write(channelb, 0, channelb.length);
-    raf.write(e.data, 0, e.data.length);
+    raf.write(event.data, 0, event.data.length);
   }
 
   /** A convenience method for write. It internally manages the eventNumber
@@ -124,7 +124,7 @@ public class Log {
     le.data = outs.toByteArray();
     le.eventNumber = numMessagesWritten;
     write(le);
-    numMessagesWritten++;
+    ++numMessagesWritten;
   }
 
   /** Alternative write method for the LCM logger.
@@ -140,7 +140,7 @@ public class Log {
     le.data = msg;
     le.eventNumber = numMessagesWritten;
     write(le);
-    numMessagesWritten++;
+    ++numMessagesWritten;
   }
 
   /** Closes the log file and releases and system resources used by it. */
