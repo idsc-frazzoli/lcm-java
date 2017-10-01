@@ -53,9 +53,13 @@ public class UDPMulticastProvider implements Provider {
     else
       System.err.println("LCM: TTL set to 1.");
     sock.setTimeToLive(up.get("ttl", DEFAULT_TTL));
-    // TODO according to andi, joingroup fails on a mac when using wifi
-    // when not using -Djava.net.preferIPv4Stack=true as VM argument
-    sock.joinGroup(inetAddr);
+    try {
+      sock.joinGroup(inetAddr);
+    } catch (Exception exception) {
+      System.out.println(TroubleShooter.joinGroup());
+      System.out.flush();
+      throw exception;
+    }
   }
 
   @Override

@@ -63,7 +63,7 @@ public class Log {
     Event event = new Event();
     int channellen = 0, datalen = 0;
     while (true) {
-      int v = raf.readByte() & 0xff;
+      int v = raf.readByte() & 0xff; // typically the cause of an exception at EOF
       magic = (magic << 8) | v;
       if (magic != LOG_MAGIC)
         continue;
