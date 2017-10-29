@@ -1,4 +1,4 @@
-// code by lcm
+// code by lcm, njenwei, and jph
 package lcm.spy;
 
 import java.awt.BorderLayout;
@@ -25,6 +25,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumnModel;
 
@@ -38,19 +39,18 @@ import lcm.util.TableSorter;
 /** Spy main class */
 // FIXME process does not terminate if object panel is opened
 public class Spy {
-  LCM lcm;
+  private LCM lcm;
   final LcmTypeDatabase lcmTypeDatabase; // accessed in UniversalSubscriber
-  long startuTime; // time that lcm-spy started
   Map<String, ChannelData> channelMap = new HashMap<>();
   List<ChannelData> channelList = new ArrayList<>();
   ChannelTableModel _channelTableModel = new ChannelTableModel(channelList);
   TableSorter channelTableModel = new TableSorter(_channelTableModel);
   JTable channelTable = new JTable(channelTableModel);
   ChartData chartData;
-  List<SpyPlugin> plugins = new ArrayList<>();
-  JButton clearButton = new JButton("Clear");
-  JFrame jFrame;
-  HzThread hzThread; // Added by Jen
+  private List<SpyPlugin> plugins = new ArrayList<>();
+  public final JFrame jFrame = new JFrame("LCM Spy");
+  private JButton clearButton = new JButton("Clear");
+  private HzThread hzThread; // Added by Jen
   JLabel jLabelInfo = new JLabel();
   long totalBytes = 0;
   long totalBytesRate = 0;
@@ -82,7 +82,7 @@ public class Spy {
       tcm.getColumn(6).setCellRenderer(dtcr);
       tcm.getColumn(7).setCellRenderer(dtcr);
     }
-    jFrame = new JFrame("LCM Spy");
+    jFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     jFrame.setLayout(new BorderLayout());
     jFrame.add(channelTable.getTableHeader(), BorderLayout.PAGE_START);
     {
@@ -139,16 +139,16 @@ public class Spy {
     });
     jFrame.addWindowListener(new WindowAdapter() {
       @Override
-      public void windowClosing(WindowEvent windowEvent) {
+      public void windowClosed(WindowEvent windowEvent) {
         System.out.println("Spy quitting");
         close(); // Added by Jen
       }
     });
-    System.out.println("---");
     ClassDiscovery.execute(ClassPaths.getDefault(), new PluginClassVisitor());
-    System.out.println("Found " + plugins.size() + " plugins");
-    for (SpyPlugin plugin : plugins) {
-      System.out.println(" " + plugin);
+    if (!plugins.isEmpty()) {
+      System.out.println("Found " + plugins.size() + " plugins");
+      for (SpyPlugin plugin : plugins)
+        System.out.println(" " + plugin);
     }
   }
 
@@ -160,6 +160,7 @@ public class Spy {
       // ---
     }
     hzThread.interrupt(); // Added by Jen
+    // ---
     jFrame.setVisible(false);
     jFrame.dispose();
   }
@@ -168,8 +169,8 @@ public class Spy {
     @Override
     public void classFound(String jar, Class<?> cls) {
       Class<?> interfaces[] = cls.getInterfaces();
-      for (Class<?> iface : interfaces) {
-        if (iface.equals(SpyPlugin.class)) {
+      for (Class<?> iface : interfaces)
+        if (iface.equals(SpyPlugin.class))
           try {
             Constructor<?> c = cls.getConstructor(new Class[0]);
             SpyPlugin plugin = (SpyPlugin) c.newInstance(new Object[0]);
@@ -177,8 +178,6 @@ public class Spy {
           } catch (Exception ex) {
             System.out.println("ex: " + ex);
           }
-        }
-      }
     }
   }
 
