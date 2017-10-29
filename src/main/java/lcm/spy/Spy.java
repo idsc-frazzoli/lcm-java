@@ -82,8 +82,7 @@ public class Spy {
       tcm.getColumn(6).setCellRenderer(dtcr);
       tcm.getColumn(7).setCellRenderer(dtcr);
     }
-    // jFrame
-    jFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+    jFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     jFrame.setLayout(new BorderLayout());
     jFrame.add(channelTable.getTableHeader(), BorderLayout.PAGE_START);
     {
@@ -98,7 +97,7 @@ public class Spy {
     chartData = new ChartData(utime_now());
     jFrame.setSize(800, 600);
     jFrame.setLocationByPlatform(true);
-    // jFrame.setVisible(true);
+    jFrame.setVisible(true);
     if (null == lcmurl)
       lcm = new LCM();
     else
@@ -253,12 +252,6 @@ public class Spy {
     jm.show(channelTable, e.getX(), e.getY());
   }
 
-  public static void standalone(String lcmurl) throws IOException {
-    Spy spy = new Spy(lcmurl);
-    spy.jFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-    spy.jFrame.setVisible(true);
-  }
-
   public static void main(String args[]) {
     LcmStaticHelper.checkJre();
     String lcmurl = null;
@@ -284,7 +277,7 @@ public class Spy {
       }
     }
     try {
-      standalone(lcmurl);
+      new Spy(lcmurl);
     } catch (IOException ex) {
       System.out.println(ex);
     }
