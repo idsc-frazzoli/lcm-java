@@ -81,6 +81,7 @@ public class UDPMulticastProvider implements Provider {
 
   @Override
   public void unsubscribe(String channel) {
+    // deliberately empty
   }
 
   @Override
