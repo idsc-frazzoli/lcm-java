@@ -4,7 +4,7 @@
 
 Enhanced LCM tools
 
-Version `0.0.5`
+Version `0.0.6`
 
 Original code from `https://lcm-proj.github.io/`
 
@@ -46,7 +46,7 @@ Remark: On *Mac OS* when using Wifi it may be necessary to add the following to 
         <dependency>
             <groupId>ch.ethz.idsc</groupId>
             <artifactId>lcm-java</artifactId>
-            <version>0.0.5</version>
+            <version>0.0.6</version>
         </dependency>
     </dependencies>
 
@@ -66,7 +66,6 @@ Remark: On *Mac OS* when using Wifi it may be necessary to add the following to 
 ## References
 
 The library is used in the projects:
-* `retina`
-* `owly`
-* `owly3d`
 * `SwissTrolley+`
+* `retina`
+* `owl` and `owly3d`

@@ -24,7 +24,7 @@ public class Log {
     /** Event number assigned to the message in the log file. */
     public long eventNumber;
     /** Raw data bytes of the message body. */
-    public byte data[];
+    public byte[] data;
     /** Channel on which the message was received. */
     public String channel;
   }
@@ -131,8 +131,9 @@ public class Log {
    * 
    * @param mstime
    * takes the current time in milliseconds UNLIKE the original
-   * function which demands in nanosecs
+   * function which demands in micro-secs
    * @author Jen Wei */
+  @Deprecated // the change in convention from usec to msec is not justified and prone to error
   public synchronized void write(long mstime, String channel, byte[] msg) throws IOException {
     Log.Event le = new Log.Event();
     le.utime = mstime * 1000;
