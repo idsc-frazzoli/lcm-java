@@ -127,23 +127,6 @@ public class Log {
     ++numMessagesWritten;
   }
 
-  /** Alternative write method for the LCM logger.
-   * 
-   * @param mstime
-   * takes the current time in milliseconds UNLIKE the original
-   * function which demands in micro-secs
-   * @author Jen Wei */
-  @Deprecated // the change in convention from usec to msec is not justified and prone to error
-  public synchronized void write(long mstime, String channel, byte[] msg) throws IOException {
-    Log.Event le = new Log.Event();
-    le.utime = mstime * 1000;
-    le.channel = channel;
-    le.data = msg;
-    le.eventNumber = numMessagesWritten;
-    write(le);
-    ++numMessagesWritten;
-  }
-
   /** Closes the log file and releases and system resources used by it. */
   public synchronized void close() throws IOException {
     raf.close();

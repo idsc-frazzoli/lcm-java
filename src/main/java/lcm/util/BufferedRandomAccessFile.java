@@ -132,8 +132,7 @@ public class BufferedRandomAccessFile {
   }
 
   public byte readByte() throws IOException {
-    int v = read();
-    return (byte) (v & 0xff);
+    return (byte) read();
   }
 
   public short readShort() throws IOException {

@@ -9,14 +9,17 @@ import lcm.logging.Log.Event;
 enum LogEventExtract {
   ;
   public static void main(String[] args) throws Exception {
-    File file = new File("/media/datahaki/media/ethz/lcmlog", "20171207T134930_59f9bc78.lcm.00");
-    File dst = new File("/media/datahaki/media/ethz/lcmlog", "20171207T134930_59f9bc78.lcm.00_part1");
-    Log log = new Log(file.toString(), "r");
+    File src = new File("/media/datahaki/backup/gokartlogs/20171207", "20171207T105632_59f9bc78.lcm.00");
+    File dst = new File("/home/datahaki", "20171207T105632_59f9bc78.lcm.00_part1");
+    int lo = 7481997;
+    int hi = 8090113;
+    // ---
+    Log log = new Log(src.toString(), "r");
     LogEventWriter logWriter = new LogEventWriter(dst);
     try {
       while (true) {
         Event event = log.readNext();
-        if (2236384 < event.eventNumber && event.eventNumber < 2897446) {
+        if (lo < event.eventNumber && event.eventNumber < hi) {
           logWriter.write(event);
         }
       }

@@ -5,15 +5,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 /** Lightweight Communications and Marshalling Java implementation */
 public class LCM {
-  List<SubscriptionRecord> subscriptions = new ArrayList<>();
-  List<Provider> providers = new ArrayList<>();
-  Map<String, List<SubscriptionRecord>> subscriptionsMap = new HashMap<>();
+  // subscriptions objects is used for synchronization
+  private final List<SubscriptionRecord> subscriptions = new ArrayList<>();
+  private final List<Provider> providers = new ArrayList<>();
+  private final Map<String, List<SubscriptionRecord>> subscriptionsMap = new HashMap<>();
   boolean closed = false;
   static LCM singleton;
   LCMDataOutputStream encodeBuffer = new LCMDataOutputStream(new byte[1024]);
@@ -131,38 +131,6 @@ public class LCM {
     return srec;
   }
 
-  /** Remove this particular regex/subscriber pair (UNTESTED AND API MAY
-   * CHANGE). If regex is null, all subscriptions for 'sub' are cancelled. If
-   * subscriber is null, any previous subscriptions matching the regular
-   * expression will be cancelled. If both 'sub' and 'regex' are null, all
-   * subscriptions will be cancelled. */
-  // TODO clean unsubscribe of instance sub
-  public void unsubscribe(String regex, LCMSubscriber sub) {
-    if (closed)
-      throw new IllegalStateException();
-    synchronized (this) {
-      for (Provider p : providers)
-        p.unsubscribe(regex); // for udp-provides, does nothing
-    }
-    // TODO: providers don't seem to use anything beyond first channel
-    synchronized (subscriptions) {
-      // Find and remove subscriber from list
-      for (Iterator<SubscriptionRecord> it = subscriptions.iterator(); it.hasNext();) {
-        SubscriptionRecord sr = it.next();
-        if ((sub == null || sr.lcsub == sub) && (regex == null || sr.regex.equals(regex)))
-          it.remove();
-      }
-      // Find and remove subscriber from map
-      for (String channel : subscriptionsMap.keySet()) {
-        for (Iterator<SubscriptionRecord> it = subscriptionsMap.get(channel).iterator(); it.hasNext();) {
-          SubscriptionRecord sr = it.next();
-          if ((sub == null || sr.lcsub == sub) && (regex == null || sr.regex.equals(regex)))
-            it.remove();
-        }
-      }
-    }
-  }
-
   /** function not part of the original LCM API
    * 
    * @param srec */
@@ -171,9 +139,12 @@ public class LCM {
       throw new IllegalStateException();
     synchronized (subscriptions) {
       // Find and remove subscriber from list
-      subscriptions.remove(srec);
+      boolean removed = subscriptions.remove(srec);
+      if (!removed)
+        new RuntimeException(srec.regex + " not removed").printStackTrace();
       // Find and remove subscriber from map
       for (String channel : subscriptionsMap.keySet())
+        // TODO remove channel as key, if value collection is empty
         subscriptionsMap.get(channel).remove(srec);
     }
   }
@@ -223,8 +194,14 @@ public class LCM {
     // TODO by Jen Check when should close and when should unsubscribe
     if (closed)
       throw new IllegalStateException();
-    providers.forEach(Provider::close);
-    providers = null;
+    synchronized (subscriptions) {
+      subscriptions.clear();
+      subscriptionsMap.clear();
+    }
+    synchronized (this) {
+      providers.forEach(Provider::close);
+      providers.clear();
+    }
     closed = true;
   }
 }
