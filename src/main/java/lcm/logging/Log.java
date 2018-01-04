@@ -24,7 +24,7 @@ public class Log {
     /** Event number assigned to the message in the log file. */
     public long eventNumber;
     /** Raw data bytes of the message body. */
-    public byte data[];
+    public byte[] data;
     /** Channel on which the message was received. */
     public String channel;
   }
@@ -122,22 +122,6 @@ public class Log {
     LCMDataOutputStream outs = new LCMDataOutputStream();
     msg.encode(outs);
     le.data = outs.toByteArray();
-    le.eventNumber = numMessagesWritten;
-    write(le);
-    ++numMessagesWritten;
-  }
-
-  /** Alternative write method for the LCM logger.
-   * 
-   * @param mstime
-   * takes the current time in milliseconds UNLIKE the original
-   * function which demands in nanosecs
-   * @author Jen Wei */
-  public synchronized void write(long mstime, String channel, byte[] msg) throws IOException {
-    Log.Event le = new Log.Event();
-    le.utime = mstime * 1000;
-    le.channel = channel;
-    le.data = msg;
     le.eventNumber = numMessagesWritten;
     write(le);
     ++numMessagesWritten;

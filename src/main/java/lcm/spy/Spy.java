@@ -155,7 +155,8 @@ public class Spy {
   public void close() {
     // use try because user might close the window itself
     try {
-      lcm.close(); // Added by Jen
+      // FIXME close should only be called from a spy that is Standalone
+      // lcm.close(); // Added by Jen
     } catch (Exception exception) {
       // ---
     }
