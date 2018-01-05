@@ -7,7 +7,6 @@ import lcm.util.ClassDiscovery;
 import lcm.util.ClassVisitor;
 
 public class LcmTypeDatabaseBuilder implements ClassVisitor {
-  ;
   public static LcmTypeDatabase create(String classpath) {
     LcmTypeDatabaseBuilder instance = new LcmTypeDatabaseBuilder();
     ClassDiscovery.execute(classpath, instance);

@@ -101,7 +101,7 @@ public class TCPService {
       }
     }
 
-    ArrayList<SubscriptionRecord> subscriptions = new ArrayList<SubscriptionRecord>();
+    List<SubscriptionRecord> subscriptions = new ArrayList<>();
     ReadWriteLock subscriptions_lock = new ReentrantReadWriteLock();
 
     public ClientThread(Socket sock) throws IOException {

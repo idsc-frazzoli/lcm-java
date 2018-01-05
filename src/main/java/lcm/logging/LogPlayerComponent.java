@@ -445,23 +445,23 @@ public class LogPlayerComponent extends JComponent {
     if (currentLogPath == null)
       return;
     String path = currentLogPath + ".jlp";
-    FileWriter fouts = new FileWriter(path);
-    BufferedWriter outs = new BufferedWriter(fouts);
-    List<JScrubber.Bookmark> bookmarks = js.getBookmarks();
-    for (JScrubber.Bookmark b : bookmarks) {
-      String type = "PLAIN";
-      if (b.type == JScrubber.BOOKMARK_LREPEAT)
-        type = "LREPEAT";
-      if (b.type == JScrubber.BOOKMARK_RREPEAT)
-        type = "RREPEAT";
-      outs.write("BOOKMARK " + type + " " + b.position + "\n");
+    try (FileWriter fouts = new FileWriter(path)) {
+      try (BufferedWriter outs = new BufferedWriter(fouts)) {
+        List<JScrubber.Bookmark> bookmarks = js.getBookmarks();
+        for (JScrubber.Bookmark b : bookmarks) {
+          String type = "PLAIN";
+          if (b.type == JScrubber.BOOKMARK_LREPEAT)
+            type = "LREPEAT";
+          if (b.type == JScrubber.BOOKMARK_RREPEAT)
+            type = "RREPEAT";
+          outs.write("BOOKMARK " + type + " " + b.position + "\n");
+        }
+        outs.write("ZOOMFRAC " + js.getZoomFraction() + "\n");
+        for (Filter f : filters) {
+          outs.write("CHANNEL " + f.inchannel + " " + f.outchannel + " " + f.enabled + "\n");
+        }
+      }
     }
-    outs.write("ZOOMFRAC " + js.getZoomFraction() + "\n");
-    for (Filter f : filters) {
-      outs.write("CHANNEL " + f.inchannel + " " + f.outchannel + " " + f.enabled + "\n");
-    }
-    outs.close();
-    fouts.close();
   }
 
   private Filter addChannelFilter(String channel, boolean enabledByDefault) {

@@ -15,7 +15,7 @@ public class MemqProvider implements Provider {
 
   public MemqProvider(LCM lcm, URLParser up) {
     this.lcm = lcm;
-    this.queue = new LinkedBlockingQueue<Message>();
+    this.queue = new LinkedBlockingQueue<>();
     reader = new ReaderThread();
     reader.start();
   }
