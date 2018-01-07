@@ -35,6 +35,7 @@ public final class LCMDataInputStream implements DataInput {
   }
 
   public void close() {
+    // ---
   }
 
   public void reset() {
@@ -135,7 +136,7 @@ public final class LCMDataInputStream implements DataInput {
 
   /** Read a string of 8-bit characters terminated by a zero. The zero is
    * consumed. **/
-  public String readStringZ() throws IOException {
+  public String readStringZ() {
     StringBuffer sb = new StringBuffer();
     while (true) {
       int v = buf[pos++] & 0xff;

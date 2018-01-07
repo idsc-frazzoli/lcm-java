@@ -75,18 +75,6 @@ public class LCM {
     return subscriptions.size();
   }
 
-  /** Publish a string on a channel. This method does not use the LCM type
-   * definitions and thus is not type safe. This method is primarily provided
-   * for testing purposes and may be removed in the future. */
-  // TODO remove function
-  public void publish(String channel, String s) {
-    if (closed)
-      throw new IllegalStateException();
-    s = s + "\0";
-    byte[] b = s.getBytes();
-    publish(channel, b, 0, b.length);
-  }
-
   /** Publish an LCM-defined type on a channel. If more than one URL was
    * specified, the message will be sent on each. **/
   public synchronized void publish(String channel, LCMEncodable e) {

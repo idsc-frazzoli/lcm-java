@@ -54,6 +54,7 @@ public class ClassDiscovery {
           if (cls != null)
             classVisitor.classFound(classpath_entry, cls);
         } catch (Throwable ex) {
+          // ---
         }
       }
     }
