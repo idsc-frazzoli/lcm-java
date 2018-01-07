@@ -52,6 +52,7 @@ public class MessageAggregator implements LCMSubscriber {
       }
       notify();
     } catch (IOException xcp) {
+      // ---
     }
   }
 
@@ -113,6 +114,7 @@ public class MessageAggregator implements LCMSubscriber {
         return m;
       }
     } catch (InterruptedException xcp) {
+      // ---
     }
     return null;
   }

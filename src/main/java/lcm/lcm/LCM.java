@@ -78,7 +78,8 @@ public class LCM {
   /** Publish a string on a channel. This method does not use the LCM type
    * definitions and thus is not type safe. This method is primarily provided
    * for testing purposes and may be removed in the future. */
-  public void publish(String channel, String s) throws IOException {
+  // TODO remove function
+  public void publish(String channel, String s) {
     if (closed)
       throw new IllegalStateException();
     s = s + "\0";
@@ -103,7 +104,7 @@ public class LCM {
   /** Publish raw data on a channel, bypassing the LCM type specification. If
    * more than one URL was specified when the LCM object was created, the
    * message will be sent on each. **/
-  public synchronized void publish(String channel, byte[] data, int offset, int length) throws IOException {
+  public synchronized void publish(String channel, byte[] data, int offset, int length) {
     if (closed)
       throw new IllegalStateException();
     for (Provider p : providers)

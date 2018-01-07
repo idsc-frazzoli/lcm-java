@@ -86,7 +86,7 @@ public class Log {
     return event;
   }
 
-  public synchronized double getPositionFraction() throws IOException {
+  public synchronized double getPositionFraction() {
     return raf.getFilePointer() / ((double) raf.length());
   }
 

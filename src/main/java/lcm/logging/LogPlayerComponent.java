@@ -410,6 +410,7 @@ public class LogPlayerComponent extends JComponent {
               System.out.println("Unknown remote command: " + cmd);
             }
           } catch (IOException ex) {
+            // ---
           }
         }
       } catch (Exception ex) {
@@ -697,7 +698,7 @@ public class LogPlayerComponent extends JComponent {
             localOffset = System.nanoTime() / 1000;
             lastspeed = speed;
           }
-          long logRelativeTime = (long) (e.utime - logOffset);
+          long logRelativeTime = e.utime - logOffset;
           long now = System.nanoTime();
           long clockRelativeTime = now / 1000 - localOffset;
           // we don't support playback below a rate of 1/1024x

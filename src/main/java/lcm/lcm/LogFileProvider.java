@@ -62,10 +62,12 @@ public class LogFileProvider implements Provider {
 
   @Override
   public synchronized void subscribe(String channel) {
+    // ---
   }
 
   @Override
   public void unsubscribe(String channel) {
+    // ---
   }
 
   @Override
@@ -75,12 +77,14 @@ public class LogFileProvider implements Provider {
       try {
         reader.join();
       } catch (InterruptedException ex) {
+        // ---
       }
     }
     reader = null;
     try {
       log.close();
     } catch (IOException ex) {
+      // ---
     }
     log = null;
   }

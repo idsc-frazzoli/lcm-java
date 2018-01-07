@@ -81,6 +81,7 @@ public class TCPService {
             clients_lock.writeLock().unlock();
           }
         } catch (IOException ex) {
+          // ---
         }
       }
     }
@@ -157,12 +158,14 @@ public class TCPService {
           }
         }
       } catch (IOException ex) {
+        // ---
       }
       ///////////////////////
       // Something bad happened, close this connection.
       try {
         closeResources();
       } catch (IOException ex) {
+        // ---
       }
       try {
         clients_lock.writeLock().lock();
@@ -193,6 +196,7 @@ public class TCPService {
           }
         }
       } catch (IOException ex) {
+        // ---
       } finally {
         subscriptions_lock.readLock().unlock();
       }

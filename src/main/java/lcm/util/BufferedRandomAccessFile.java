@@ -50,7 +50,7 @@ public class BufferedRandomAccessFile {
     return bufferOffset + bufferPosition;
   }
 
-  public long length() throws IOException {
+  public long length() {
     return fileLength;
   }
 
@@ -103,7 +103,7 @@ public class BufferedRandomAccessFile {
     return buffer[bufferPosition++] & 0xff;
   }
 
-  public boolean hasMore() throws IOException {
+  public boolean hasMore() {
     return bufferPosition + bufferOffset < fileLength;
   }
 
@@ -200,7 +200,7 @@ public class BufferedRandomAccessFile {
     v |= (((long) read()) << 24);
     v |= (((long) read()) << 16);
     v |= (((long) read()) << 8);
-    v |= (((long) read()));
+    v |= read();
     return v;
   }
 
