@@ -29,14 +29,10 @@ public class MessageAggregator implements LCMSubscriber {
     }
   }
 
-  // Would prefer to use ArrayDequeue for performance reasons, but it's too
-  // new
-  // (only since Java 1.6)
-  Deque<Message> messages = new ArrayDeque<>();
-  // Deque<Message> messages = new LinkedList<>();
-  long queue_data_size = 0;
-  long max_queue_data_size = 100 * (1 << 20); // 100 megabytes
-  int max_queue_length = Integer.MAX_VALUE;
+  private final Deque<Message> messages = new ArrayDeque<>();
+  private long queue_data_size = 0;
+  private long max_queue_data_size = 100 * (1 << 20); // 100 megabytes
+  private int max_queue_length = Integer.MAX_VALUE;
 
   /** Internal method, called by LCM when a message is received. */
   @Override

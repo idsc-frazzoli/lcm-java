@@ -19,7 +19,7 @@ public class ChartData {
   /** start time of lcm-spy, which all X-axis are based off of */
   private long startuTime;
   /** list of all charts displayed */
-  private List<ZoomableChartScrollWheel> charts = new LinkedList<>();
+  private final List<ZoomableChartScrollWheel> charts = new LinkedList<>();
 
   /** Constructor for ChartData. Initializes color list and sets the start time
    * of lcm-spy

@@ -58,22 +58,4 @@ public class URLParser {
       return def;
     return Double.parseDouble(v);
   }
-
-  public static void main(String args[]) {
-    URLParser u = null;
-    if (args.length < 1) {
-      String env = System.getenv("LCM_DEFAULT_URL");
-      if (null != env)
-        u = new URLParser(env);
-      else {
-        System.err.println("Must specify URL");
-        System.exit(1);
-      }
-    } else {
-      u = new URLParser(args[0]);
-    }
-    for (String key : u.params.keySet()) {
-      System.err.printf("param %15s: %s\n", key, u.params.get(key));
-    }
-  }
 }

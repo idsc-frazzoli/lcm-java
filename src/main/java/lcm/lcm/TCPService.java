@@ -12,12 +12,13 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 
+// TODO class does not have a conventional close/stop function!
 public class TCPService {
-  ServerSocket serverSocket;
-  AcceptThread acceptThread;
-  List<ClientThread> clients = new ArrayList<>();
-  ReadWriteLock clients_lock = new ReentrantReadWriteLock();
-  int bytesCount = 0;
+  private final ServerSocket serverSocket;
+  private final AcceptThread acceptThread;
+  private final List<ClientThread> clients = new ArrayList<>();
+  private final ReadWriteLock clients_lock = new ReentrantReadWriteLock();
+  private int bytesCount = 0;
 
   public TCPService(int port) throws IOException {
     serverSocket = new ServerSocket(port);
@@ -200,17 +201,6 @@ public class TCPService {
       } finally {
         subscriptions_lock.readLock().unlock();
       }
-    }
-  }
-
-  public static void main(String args[]) {
-    try {
-      int port = TCPProvider.DEFAULT_PORT;
-      if (args.length > 0)
-        port = Integer.parseInt(args[0]);
-      new TCPService(port);
-    } catch (IOException ex) {
-      System.out.println("Ex: " + ex);
     }
   }
 }

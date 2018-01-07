@@ -4,8 +4,8 @@ package lcm.lcm;
 import java.io.DataOutput;
 
 public final class LCMDataOutputStream implements DataOutput {
-  byte buf[];
-  int pos;
+  private byte buf[];
+  private int pos;
 
   public LCMDataOutputStream() {
     this(512);

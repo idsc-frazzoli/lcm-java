@@ -1,7 +1,7 @@
 // code by jph
 package lcm.lcm;
 
-enum TroubleShooter {
+/* package */ enum TroubleShooter {
   ;
   public static String joinGroup() {
     StringBuilder stringBuilder = new StringBuilder();

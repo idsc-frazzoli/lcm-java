@@ -14,9 +14,9 @@ public class LCM {
   private final List<SubscriptionRecord> subscriptions = new ArrayList<>();
   private final List<Provider> providers = new ArrayList<>();
   private final Map<String, List<SubscriptionRecord>> subscriptionsMap = new HashMap<>();
-  boolean closed = false;
-  static LCM singleton;
-  LCMDataOutputStream encodeBuffer = new LCMDataOutputStream(new byte[1024]);
+  private boolean closed = false;
+  private static LCM singleton;
+  private final LCMDataOutputStream encodeBuffer = new LCMDataOutputStream(new byte[1024]);
 
   /** Create a new LCM object, connecting to one or more URLs. If no URL is
    * specified, the environment variable LCM_DEFAULT_URL is used. If that

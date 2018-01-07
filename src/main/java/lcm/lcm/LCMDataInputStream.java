@@ -7,11 +7,11 @@ import java.io.IOException;
 
 /** Will not throw EOF. */
 public final class LCMDataInputStream implements DataInput {
-  byte buf[];
-  int pos = 0; // current index into buf.
-  int len; // number of valid bytes in buffer
-  int startpos; // index of first valid byte
-  int endpos; // index of byte after last valid byte
+  private byte buf[];
+  private int pos = 0; // current index into buf.
+  // private int len; // number of valid bytes in buffer
+  private int startpos; // index of first valid byte
+  private int endpos; // index of byte after last valid byte
 
   public LCMDataInputStream(byte buf[]) {
     this.buf = buf;
