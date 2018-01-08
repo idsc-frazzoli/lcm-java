@@ -91,6 +91,7 @@ public class UDPMulticastProvider implements Provider {
       try {
         reader.join();
       } catch (InterruptedException ex) {
+        // ---
       }
     }
     reader = null;

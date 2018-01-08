@@ -15,7 +15,7 @@ public class MemqProvider implements Provider {
 
   public MemqProvider(LCM lcm, URLParser up) {
     this.lcm = lcm;
-    this.queue = new LinkedBlockingQueue<Message>();
+    this.queue = new LinkedBlockingQueue<>();
     reader = new ReaderThread();
     reader.start();
   }
@@ -29,15 +29,18 @@ public class MemqProvider implements Provider {
     try {
       queue.put(msg);
     } catch (InterruptedException ex) {
+      // ---
     }
   }
 
   @Override
   public synchronized void subscribe(String channel) {
+    // ---
   }
 
   @Override
   public void unsubscribe(String channel) {
+    // ---
   }
 
   @Override
@@ -47,6 +50,7 @@ public class MemqProvider implements Provider {
       try {
         reader.join();
       } catch (InterruptedException ex) {
+        // ---
       }
     }
     reader = null;

@@ -11,7 +11,7 @@ import java.io.RandomAccessFile;
 public class BufferedRandomAccessFile {
   private static final int BUFFER_SIZE = 32768; // must be power of two!
   // ---
-  private RandomAccessFile raf;
+  private final RandomAccessFile raf;
   /** buffer needs to be written back to disk? (If true, reads MUST use buffer.) */
   private boolean bufferDirty = false;
   private byte[] buffer = new byte[BUFFER_SIZE];
@@ -50,7 +50,7 @@ public class BufferedRandomAccessFile {
     return bufferOffset + bufferPosition;
   }
 
-  public long length() throws IOException {
+  public long length() {
     return fileLength;
   }
 
@@ -103,7 +103,7 @@ public class BufferedRandomAccessFile {
     return buffer[bufferPosition++] & 0xff;
   }
 
-  public boolean hasMore() throws IOException {
+  public boolean hasMore() {
     return bufferPosition + bufferOffset < fileLength;
   }
 
@@ -200,7 +200,7 @@ public class BufferedRandomAccessFile {
     v |= (((long) read()) << 24);
     v |= (((long) read()) << 16);
     v |= (((long) read()) << 8);
-    v |= (((long) read()));
+    v |= read();
     return v;
   }
 

@@ -77,7 +77,7 @@ class JScrubber extends JComponent {
   }
 
   public void clearBookmarks() {
-    bookmarks = new ArrayList<Bookmark>();
+    bookmarks = new ArrayList<>();
     repaint();
   }
 
@@ -102,7 +102,8 @@ class JScrubber extends JComponent {
       if (bookmarks.size() == 0) {
         System.out.println("didn't find bookmark region");
         return;
-      } else if (bookmarks.size() == 1) {
+      } else //
+      if (bookmarks.size() == 1) {
         // if there is only one bookmark, use from beginning/end to it
         Bookmark b = bookmarks.get(0);
         if (position > b.position)
@@ -122,9 +123,9 @@ class JScrubber extends JComponent {
       } else {
         // find previous and next book marks.
         for (Bookmark b : bookmarks) {
-          if (b.position < position && (b0 == null || b0.position < b.position))
+          if (b.position < position && b0.position < b.position)
             b0 = b;
-          if (b.position > position && (b1 == null || b1.position > b.position))
+          if (b.position > position && b1.position > b.position)
             b1 = b;
         }
       }
@@ -234,11 +235,9 @@ class JScrubber extends JComponent {
   /** Get position for a mouse click on a particular row Set row = 1 for the
    * zoomed in slider. */
   double getPosition(int x, int y, int row) {
-    if (row == 1) {
+    if (row == 1)
       return getPosition2(x);
-    } else {
-      return getPosition(x);
-    }
+    return getPosition(x);
   }
 
   void updateGeometry() {

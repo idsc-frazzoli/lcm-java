@@ -6,16 +6,16 @@ import java.io.IOException;
 import lcm.logging.Log;
 
 public class LogFileProvider implements Provider {
-  private LCM lcm;
+  private final LCM lcm;
   private Log log;
   private double speed; // how fast do we play? <=0 for "as fast as possible"
-  private double delay; // how many seconds to delay before starting to play? (crude
-  // race-condition hack)
-  boolean verbose; // report actual speed periodically
-  double skip; // skip a fraction of the log file [0, 1.0]
-  boolean writemode;
-  long nanotime_start;
-  long utime_start;
+  /** how many seconds to delay before starting to play? (crude race-condition hack) */
+  private double delay;
+  private boolean verbose; // report actual speed periodically
+  private double skip; // skip a fraction of the log file [0, 1.0]
+  private boolean writemode;
+  private long nanotime_start;
+  private long utime_start;
   private ReaderThread reader;
 
   public LogFileProvider(LCM lcm, URLParser up) throws IOException {
@@ -37,7 +37,7 @@ public class LogFileProvider implements Provider {
     }
   }
 
-  boolean publishWarned = false;
+  private boolean publishWarned = false;
 
   @Override
   public synchronized void publish(String channel, byte data[], int offset, int length) {
@@ -62,10 +62,12 @@ public class LogFileProvider implements Provider {
 
   @Override
   public synchronized void subscribe(String channel) {
+    // ---
   }
 
   @Override
   public void unsubscribe(String channel) {
+    // ---
   }
 
   @Override
@@ -75,12 +77,14 @@ public class LogFileProvider implements Provider {
       try {
         reader.join();
       } catch (InterruptedException ex) {
+        // ---
       }
     }
     reader = null;
     try {
       log.close();
     } catch (IOException ex) {
+      // ---
     }
     log = null;
   }

@@ -404,8 +404,8 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
       double xSqSize = xAxisRange * zoomFactor;
       double ySqSize = yAxisRange * zoomFactor;
       // compute percentage of chart the mouse pointer is at
-      double xPercent = ((double) e.getX() - (double) chart.getXChartStart()) / (double) (chart.getXChartEnd() - chart.getXChartStart());
-      double yPercent = ((double) e.getY() - (double) chart.getYChartEnd()) / (double) (chart.getYChartStart() - chart.getYChartEnd());
+      double xPercent = ((double) e.getX() - (double) chart.getXChartStart()) / (chart.getXChartEnd() - chart.getXChartStart());
+      double yPercent = ((double) e.getY() - (double) chart.getYChartEnd()) / (chart.getYChartStart() - chart.getYChartEnd());
       // compute new bounds with the percentages remaining the same so
       // whatever
       // is under the cursor will stay under the cursor

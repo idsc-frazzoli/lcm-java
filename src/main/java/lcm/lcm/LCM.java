@@ -14,9 +14,9 @@ public class LCM {
   private final List<SubscriptionRecord> subscriptions = new ArrayList<>();
   private final List<Provider> providers = new ArrayList<>();
   private final Map<String, List<SubscriptionRecord>> subscriptionsMap = new HashMap<>();
-  boolean closed = false;
-  static LCM singleton;
-  LCMDataOutputStream encodeBuffer = new LCMDataOutputStream(new byte[1024]);
+  private boolean closed = false;
+  private static LCM singleton;
+  private final LCMDataOutputStream encodeBuffer = new LCMDataOutputStream(new byte[1024]);
 
   /** Create a new LCM object, connecting to one or more URLs. If no URL is
    * specified, the environment variable LCM_DEFAULT_URL is used. If that
@@ -75,17 +75,6 @@ public class LCM {
     return subscriptions.size();
   }
 
-  /** Publish a string on a channel. This method does not use the LCM type
-   * definitions and thus is not type safe. This method is primarily provided
-   * for testing purposes and may be removed in the future. */
-  public void publish(String channel, String s) throws IOException {
-    if (closed)
-      throw new IllegalStateException();
-    s = s + "\0";
-    byte[] b = s.getBytes();
-    publish(channel, b, 0, b.length);
-  }
-
   /** Publish an LCM-defined type on a channel. If more than one URL was
    * specified, the message will be sent on each. **/
   public synchronized void publish(String channel, LCMEncodable e) {
@@ -103,7 +92,7 @@ public class LCM {
   /** Publish raw data on a channel, bypassing the LCM type specification. If
    * more than one URL was specified when the LCM object was created, the
    * message will be sent on each. **/
-  public synchronized void publish(String channel, byte[] data, int offset, int length) throws IOException {
+  public synchronized void publish(String channel, byte[] data, int offset, int length) {
     if (closed)
       throw new IllegalStateException();
     for (Provider p : providers)

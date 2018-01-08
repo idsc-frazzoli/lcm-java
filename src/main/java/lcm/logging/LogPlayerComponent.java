@@ -410,6 +410,7 @@ public class LogPlayerComponent extends JComponent {
               System.out.println("Unknown remote command: " + cmd);
             }
           } catch (IOException ex) {
+            // ---
           }
         }
       } catch (Exception ex) {
@@ -445,23 +446,23 @@ public class LogPlayerComponent extends JComponent {
     if (currentLogPath == null)
       return;
     String path = currentLogPath + ".jlp";
-    FileWriter fouts = new FileWriter(path);
-    BufferedWriter outs = new BufferedWriter(fouts);
-    List<JScrubber.Bookmark> bookmarks = js.getBookmarks();
-    for (JScrubber.Bookmark b : bookmarks) {
-      String type = "PLAIN";
-      if (b.type == JScrubber.BOOKMARK_LREPEAT)
-        type = "LREPEAT";
-      if (b.type == JScrubber.BOOKMARK_RREPEAT)
-        type = "RREPEAT";
-      outs.write("BOOKMARK " + type + " " + b.position + "\n");
+    try (FileWriter fouts = new FileWriter(path)) {
+      try (BufferedWriter outs = new BufferedWriter(fouts)) {
+        List<JScrubber.Bookmark> bookmarks = js.getBookmarks();
+        for (JScrubber.Bookmark b : bookmarks) {
+          String type = "PLAIN";
+          if (b.type == JScrubber.BOOKMARK_LREPEAT)
+            type = "LREPEAT";
+          if (b.type == JScrubber.BOOKMARK_RREPEAT)
+            type = "RREPEAT";
+          outs.write("BOOKMARK " + type + " " + b.position + "\n");
+        }
+        outs.write("ZOOMFRAC " + js.getZoomFraction() + "\n");
+        for (Filter f : filters) {
+          outs.write("CHANNEL " + f.inchannel + " " + f.outchannel + " " + f.enabled + "\n");
+        }
+      }
     }
-    outs.write("ZOOMFRAC " + js.getZoomFraction() + "\n");
-    for (Filter f : filters) {
-      outs.write("CHANNEL " + f.inchannel + " " + f.outchannel + " " + f.enabled + "\n");
-    }
-    outs.close();
-    fouts.close();
   }
 
   private Filter addChannelFilter(String channel, boolean enabledByDefault) {
@@ -697,7 +698,7 @@ public class LogPlayerComponent extends JComponent {
             localOffset = System.nanoTime() / 1000;
             lastspeed = speed;
           }
-          long logRelativeTime = (long) (e.utime - logOffset);
+          long logRelativeTime = e.utime - logOffset;
           long now = System.nanoTime();
           long clockRelativeTime = now / 1000 - localOffset;
           // we don't support playback below a rate of 1/1024x

@@ -1,9 +1,7 @@
 // code by lcm
 package lcm.util;
 
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Graphics;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -68,11 +66,10 @@ import javax.swing.table.TableModel;
  * @author Parwinder Sekhon
  * @version 2.0 02/27/04 */
 public class TableSorter extends AbstractTableModel {
-  protected TableModel tableModel;
   public static final int DESCENDING = -1;
   public static final int NOT_SORTED = 0;
   public static final int ASCENDING = 1;
-  private static Directive EMPTY_DIRECTIVE = new Directive(-1, NOT_SORTED);
+  private static final Directive EMPTY_DIRECTIVE = new Directive(-1, NOT_SORTED);
   @SuppressWarnings("rawtypes")
   public static final Comparator COMPARABLE_COMAPRATOR = new Comparator() {
     @Override
@@ -88,11 +85,13 @@ public class TableSorter extends AbstractTableModel {
       return o1.toString().compareTo(o2.toString());
     }
   };
+  // ---
+  protected TableModel tableModel;
   private Row[] viewToModel;
   private int[] modelToView;
   private JTableHeader tableHeader;
-  private MouseListener mouseListener;
-  private TableModelListener tableModelListener;
+  private final MouseListener mouseListener;
+  private final TableModelListener tableModelListener;
   @SuppressWarnings("rawtypes")
   private Map columnComparators = new HashMap();
   @SuppressWarnings("rawtypes")
@@ -194,9 +193,8 @@ public class TableSorter extends AbstractTableModel {
 
   protected Icon getHeaderRendererIcon(int column, int size) {
     Directive directive = getDirective(column);
-    if (directive == EMPTY_DIRECTIVE) {
+    if (directive == EMPTY_DIRECTIVE)
       return null;
-    }
     return new Arrow(directive.direction == DESCENDING, size, sortingColumns.indexOf(directive));
   }
 
@@ -259,12 +257,12 @@ public class TableSorter extends AbstractTableModel {
   // TableModel interface methods
   @Override
   public synchronized int getRowCount() {
-    return (tableModel == null) ? 0 : tableModel.getRowCount();
+    return tableModel == null ? 0 : tableModel.getRowCount();
   }
 
   @Override
   public synchronized int getColumnCount() {
-    return (tableModel == null) ? 0 : tableModel.getColumnCount();
+    return tableModel == null ? 0 : tableModel.getColumnCount();
   }
 
   @Override
@@ -296,7 +294,7 @@ public class TableSorter extends AbstractTableModel {
   // Helper classes
   @SuppressWarnings("rawtypes")
   private class Row implements Comparable {
-    private int modelIndex;
+    private final int modelIndex;
 
     public Row(int index) {
       this.modelIndex = index;
@@ -414,58 +412,6 @@ public class TableSorter extends AbstractTableModel {
     }
   }
 
-  private static class Arrow implements Icon {
-    private boolean descending;
-    private int size;
-    private int priority;
-
-    public Arrow(boolean descending, int size, int priority) {
-      this.descending = descending;
-      this.size = size;
-      this.priority = priority;
-    }
-
-    @Override
-    public void paintIcon(Component c, Graphics g, int x, int y) {
-      Color color = c == null ? Color.GRAY : c.getBackground();
-      // In a compound sort, make each succesive triangle 20%
-      // smaller than the previous one.
-      int dx = (int) (size / 2 * Math.pow(0.8, priority));
-      int dy = descending ? dx : -dx;
-      // Align icon (roughly) with font baseline.
-      y = y + 5 * size / 6 + (descending ? -dy : 0);
-      int shift = descending ? 1 : -1;
-      g.translate(x, y);
-      // Right diagonal.
-      g.setColor(color.darker());
-      g.drawLine(dx / 2, dy, 0, 0);
-      g.drawLine(dx / 2, dy + shift, 0, shift);
-      // Left diagonal.
-      g.setColor(color.brighter());
-      g.drawLine(dx / 2, dy, dx, 0);
-      g.drawLine(dx / 2, dy + shift, dx, shift);
-      // Horizontal line.
-      if (descending) {
-        g.setColor(color.darker().darker());
-      } else {
-        g.setColor(color.brighter().brighter());
-      }
-      g.drawLine(dx, 0, 0, 0);
-      g.setColor(color);
-      g.translate(-x, -y);
-    }
-
-    @Override
-    public int getIconWidth() {
-      return size;
-    }
-
-    @Override
-    public int getIconHeight() {
-      return size;
-    }
-  }
-
   private class SortableHeaderRenderer implements TableCellRenderer {
     private TableCellRenderer tableCellRenderer;
 
@@ -487,8 +433,8 @@ public class TableSorter extends AbstractTableModel {
   }
 
   private static class Directive {
-    private int column;
-    private int direction;
+    private final int column;
+    private final int direction;
 
     public Directive(int column, int direction) {
       this.column = column;

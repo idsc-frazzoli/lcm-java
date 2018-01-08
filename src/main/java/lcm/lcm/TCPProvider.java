@@ -101,6 +101,7 @@ public class TCPProvider implements Provider {
       try {
         tcp.join();
       } catch (InterruptedException ex) {
+        // ---
       }
     }
     tcp = null;
@@ -110,6 +111,7 @@ public class TCPProvider implements Provider {
     try {
       Thread.sleep(ms);
     } catch (InterruptedException ex) {
+      // ---
     }
   }
 
@@ -171,6 +173,7 @@ public class TCPProvider implements Provider {
         outs.write(channel_bytes, 0, channel_bytes.length);
         write(bouts.toByteArray());
       } catch (IOException ex) {
+        // ---
       }
     }
 
@@ -230,6 +233,7 @@ public class TCPProvider implements Provider {
       try {
         sock.close();
       } catch (IOException ex) {
+        // ---
       }
       exit = true;
     }
