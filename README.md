@@ -4,7 +4,7 @@
 
 Enhanced LCM tools
 
-Version `0.0.7`
+Version `0.0.8`
 
 Original code from `https://lcm-proj.github.io/`
 
@@ -46,7 +46,7 @@ Remark: On *Mac OS* when using Wifi it may be necessary to add the following to 
         <dependency>
             <groupId>ch.ethz.idsc</groupId>
             <artifactId>lcm-java</artifactId>
-            <version>0.0.7</version>
+            <version>0.0.8</version>
         </dependency>
     </dependencies>
 

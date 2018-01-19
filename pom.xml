@@ -4,7 +4,7 @@
 
 	<groupId>ch.ethz.idsc</groupId>
 	<artifactId>lcm-java</artifactId>
-	<version>0.0.7</version>
+	<version>0.0.8</version>
 	<packaging>jar</packaging>
 
 	<name>lcm-java</name>
@@ -110,8 +110,6 @@
 					<repositoryOwner>idsc-frazzoli</repositoryOwner>
 				</configuration>
 				<executions>
-					<!-- run site-maven-plugin's 'site' target as part of the build's normal 
-						'deploy' phase -->
 					<execution>
 						<goals>
 							<goal>site</goal>
