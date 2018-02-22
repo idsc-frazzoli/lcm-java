@@ -32,7 +32,8 @@ public class LogPlayer {
       @Override
       public void windowClosing(WindowEvent e) {
         try {
-          logPlayerComponent.savePreferences();
+          // jan deactivated this to prevent the creation of a jlp file
+          // logPlayerComponent.savePreferences();
         } catch (Exception exception) {
           System.out.println("Couldn't save preferences: " + exception);
         }
