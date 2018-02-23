@@ -1,8 +1,6 @@
 // code by lcm
 package lcm.spy;
 
-import ch.ethz.idsc.lcm.util.FriendlyFormat;
-
 class HzThread extends Thread {
   private final Spy spy;
 

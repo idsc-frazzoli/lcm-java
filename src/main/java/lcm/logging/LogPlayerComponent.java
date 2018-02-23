@@ -442,6 +442,9 @@ public class LogPlayerComponent extends JComponent {
     }
   }
 
+  /** function creates a jlp file
+   * 
+   * @throws IOException */
   void savePreferences() throws IOException {
     if (currentLogPath == null)
       return;
@@ -555,8 +558,10 @@ public class LogPlayerComponent extends JComponent {
   }
 
   void setLog(String path, boolean startPlaying) throws IOException {
-    if (currentLogPath != null)
-      savePreferences();
+    if (currentLogPath != null) {
+      // jan deactivated this to prevent the creation of a jlp file
+      // savePreferences();
+    }
     currentLogPath = path;
     log = new Log(path, "r");
     logName.setText(new File(path).getName());

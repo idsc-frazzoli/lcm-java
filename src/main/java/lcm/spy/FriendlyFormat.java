@@ -1,7 +1,8 @@
 // code by jph
-package ch.ethz.idsc.lcm.util;
+package lcm.spy;
 
-public class FriendlyFormat {
+enum FriendlyFormat {
+  ;
   /** by aioobe on stackoverflow
    * 
    * @param bytes

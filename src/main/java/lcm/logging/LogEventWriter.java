@@ -11,7 +11,7 @@ public class LogEventWriter {
   private long count = -1;
 
   public LogEventWriter(File file) throws IOException {
-    log = new Log(file.getPath(), "rw");
+    log = new Log(file.getPath(), "rw"); // TODO why "r"ead ?
   }
 
   public void write(Event event) throws IOException {

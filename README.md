@@ -1,28 +1,37 @@
-# ch.ethz.idsc.lcm-java
+# ch.ethz.idsc.lcm-java <a href="https://travis-ci.org/idsc-frazzoli/jlcm"><img src="https://travis-ci.org/idsc-frazzoli/lcm-java.svg?branch=master" alt="Build Status"></a>
 
-<a href="https://travis-ci.org/idsc-frazzoli/jlcm"><img src="https://travis-ci.org/idsc-frazzoli/lcm-java.svg?branch=master" alt="Build Status"></a>
+Enhanced LCM tools in Java, version `0.0.8`
 
-Enhanced LCM tools
+Original code from [lcm-proj.github.io](https://lcm-proj.github.io/)
 
-Version `0.0.7`
+Code adapted in collaboration with `SwissTrolley+` at IDSC.
 
-Original code from `https://lcm-proj.github.io/`
+The adaptation is compatible with the original Java LCM Tools.
+Single exception: the class discovery is narrowed.
 
-Code adapted in collaboration with `SwissTrolley+`
+Diverse projects rely on the `lcm-java` library:
 
-Compatible with original Java LCM Tools: Spy, LogPlayer, ...
+<table>
+<tr>
+<td>
 
-Only modification: Class discovery is narrowed.
+![usecase_swisstrolley](https://user-images.githubusercontent.com/4012178/35968228-88547e90-0cc3-11e8-978d-4f822515156f.png)
 
+SwissTrolley plus
 
-## Enhancements in Spy
+<td>
 
-* display of total data rate
-* alignments of columns
+![usecase_gokart](https://user-images.githubusercontent.com/4012178/35968269-a92a3b46-0cc3-11e8-8d5e-1276762cdc36.png)
 
-## Enhancements in LogPlayer
+Autonomous Gokart
 
-* file chooser dialog
+</tr>
+</table>
+
+## Enhancements
+
+* in Spy: display of total data rate; alignments of columns
+* in LogPlayer: file chooser dialog
 
 ## General Setup
 
@@ -38,20 +47,19 @@ Remark: On *Mac OS* when using Wifi it may be necessary to add the following to 
 
     -Djava.net.preferIPv4Stack=true
 
+## Integration
 
-## Include in Project
+Specify `repository` and `dependency` of the lcm-java library in the `pom.xml` file of your maven project:
 
     <dependencies>
-        ...
         <dependency>
             <groupId>ch.ethz.idsc</groupId>
             <artifactId>lcm-java</artifactId>
-            <version>0.0.7</version>
+            <version>0.0.8</version>
         </dependency>
     </dependencies>
 
     <repositories>
-        ...
         <repository>
             <id>lcm-java-mvn-repo</id>
             <url>https://raw.github.com/idsc-frazzoli/lcm-java/mvn-repo/</url>
@@ -61,11 +69,3 @@ Remark: On *Mac OS* when using Wifi it may be necessary to add the following to 
             </snapshots>
         </repository>
     </repositories>
-
-
-## References
-
-The library is used in the projects:
-* `SwissTrolley+`
-* `retina`
-* `owl` and `owly3d`
