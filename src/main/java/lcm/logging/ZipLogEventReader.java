@@ -10,7 +10,7 @@ import lcm.logging.Log.Event;
 public class ZipLogEventReader {
   static final int LOG_MAGIC = 0xEDA1DA01;
   // ---
-  private BufferedZipInputStream zis;
+  private final BufferedZipInputStream zis;
   private final String path;
 
   /** Opens a compressed log file for reading.
@@ -38,8 +38,8 @@ public class ZipLogEventReader {
     Event event = new Event();
     int channellen = 0, datalen = 0;
     while (true) {
-      int v = zis.read() & 0xff; // typically the cause of an
-                                 // exception at EOF
+      // typically the cause of an exception at EOF
+      int v = zis.read() & 0xff;
       magic = (magic << 8) | v;
       if (magic != LOG_MAGIC)
         continue;

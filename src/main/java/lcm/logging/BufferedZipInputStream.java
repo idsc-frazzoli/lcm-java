@@ -14,7 +14,7 @@ import lcm.util.BufferedRandomAccessFile;
  * 
  * @author anritter */
 public class BufferedZipInputStream {
-  private ZipInputStream zis;
+  private final ZipInputStream zis;
 
   public BufferedZipInputStream(String path) throws IOException {
     zis = new ZipInputStream(new FileInputStream(path));

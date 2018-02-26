@@ -5,8 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 
-import ch.ethz.idsc.tensor.RationalScalar;
-
 enum LogPlayerDemo {
   ;
   public static void main(String[] args) throws IOException, Exception {
@@ -16,7 +14,8 @@ enum LogPlayerDemo {
     // ---
     LogPlayerConfig cfg = new LogPlayerConfig();
     cfg.logFile = url.getFile();
-    cfg.speed = RationalScalar.of(1, 64);
+    cfg.numerator = 1;
+    cfg.denominator = 64;
     LogPlayer lp = LogPlayer.create(cfg);
     Thread.sleep(3000);
     lp.close();

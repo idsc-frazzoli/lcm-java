@@ -22,7 +22,7 @@ public class LogPlayer {
   public final JFrame jFrame = new JFrame("LogPlayer");
 
   private LogPlayer(LogPlayerConfig cfg) throws IOException {
-    logPlayerComponent = new LogPlayerComponent(cfg.lcmurl, cfg.speed);
+    logPlayerComponent = new LogPlayerComponent(cfg.lcmurl, cfg.speed());
     jFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     jFrame.setLayout(new BorderLayout());
     jFrame.add(logPlayerComponent, BorderLayout.CENTER);
