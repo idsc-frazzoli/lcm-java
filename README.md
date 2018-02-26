@@ -1,6 +1,6 @@
 # ch.ethz.idsc.lcm-java <a href="https://travis-ci.org/idsc-frazzoli/jlcm"><img src="https://travis-ci.org/idsc-frazzoli/lcm-java.svg?branch=master" alt="Build Status"></a>
 
-Enhanced LCM tools in Java, version `0.0.9`
+Enhanced LCM tools in Java, version `0.1.0`
 
 Original code from [lcm-proj.github.io](https://lcm-proj.github.io/)
 
@@ -55,7 +55,7 @@ Specify `repository` and `dependency` of the lcm-java library in the `pom.xml` f
         <dependency>
             <groupId>ch.ethz.idsc</groupId>
             <artifactId>lcm-java</artifactId>
-            <version>0.0.9</version>
+            <version>0.1.0</version>
         </dependency>
     </dependencies>
 
