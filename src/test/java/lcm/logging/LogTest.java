@@ -3,13 +3,12 @@ package lcm.logging;
 
 import java.net.URL;
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 import ch.ethz.idsc.lcm.test.BinaryBlob;
-import ch.ethz.idsc.tensor.RealScalar;
-import ch.ethz.idsc.tensor.Tensor;
-import ch.ethz.idsc.tensor.Tensors;
-import ch.ethz.idsc.tensor.alg.Range;
 import junit.framework.TestCase;
 import lcm.logging.Log.Event;
 
@@ -23,12 +22,12 @@ public class LogTest extends TestCase {
     String filename = url.getFile();
     Log log = new Log(filename, "r");
     int count = 0;
-    Tensor range = Tensors.empty();
+    List<Long> range = new LinkedList<>();
     List<Integer> lengths = Arrays.asList(1206, 512);
     try {
       while (true) {
         Event event = log.readNext();
-        range.append(RealScalar.of(event.eventNumber));
+        range.add(event.eventNumber);
         BinaryBlob binaryBlob = new BinaryBlob(event.data);
         assertTrue(lengths.contains(binaryBlob.data_length));
         assertEquals(binaryBlob.data.length, binaryBlob.data_length);
@@ -37,7 +36,7 @@ public class LogTest extends TestCase {
     } catch (Exception exception) {
       // ---
     }
-    assertEquals(range, Range.of(0, range.length()));
+    assertEquals(range, LongStream.range(0, range.size()).boxed().collect(Collectors.toList()));
     assertEquals(count, 34);
   }
 }

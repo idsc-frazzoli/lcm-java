@@ -44,10 +44,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 
-import ch.ethz.idsc.tensor.RationalScalar;
-import ch.ethz.idsc.tensor.RealScalar;
-import ch.ethz.idsc.tensor.Scalar;
-import ch.ethz.idsc.tensor.red.Max;
 import lcm.lcm.LCM;
 
 /** A GUI implementation of a log player allowing seeking. **/
@@ -62,7 +58,7 @@ public class LogPlayerComponent extends JComponent {
   private final JButton stepButton = new JButton("Step");
   private final JButton fasterButton;
   private final JButton slowerButton;
-  private Scalar speed = RealScalar.ONE;
+  private BigFraction speed = BigFraction.of(1, 1);
   private final JLabel speedLabel = new JLabel(speed.toString(), JLabel.CENTER);
   private final JLabel posLabel = new JLabel("Event 0");
   private final JLabel timeLabel = new JLabel("Time 0.0s");
@@ -181,16 +177,20 @@ public class LogPlayerComponent extends JComponent {
   }
 
   // faster/slower would be better as semi-log.
-  private static Scalar slowerSpeed(Scalar v) {
-    return v.divide(RealScalar.of(2));
+  private static BigFraction slowerSpeed(BigFraction v) {
+    return v.divide(BigFraction.of(2, 1));
   }
 
-  private static Scalar fasterSpeed(Scalar v) {
-    return v.multiply(RealScalar.of(2));
+  private static BigFraction fasterSpeed(BigFraction v) {
+    return v.multiply(BigFraction.of(2, 1));
   }
 
-  void setSpeed(Scalar value) {
-    value = Max.of(RationalScalar.of(1, 1024), value); // minimum supported speed (0.000977x)
+  private static final BigFraction MIN = BigFraction.of(1, 1024);
+
+  void setSpeed(BigFraction value) {
+    // minimum supported speed (0.000977x)
+    if (value.doubleValue() < MIN.doubleValue())
+      value = MIN;
     speedLabel.setText(value.toString());
     speed = value;
   }
@@ -203,7 +203,7 @@ public class LogPlayerComponent extends JComponent {
     invertFilteredPattern = true;
   }
 
-  LogPlayerComponent(String lcmurl, Scalar _speed) throws IOException {
+  LogPlayerComponent(String lcmurl, BigFraction _speed) throws IOException {
     setSpeed(_speed);
     setLayout(new GridBagLayout());
     @SuppressWarnings("unused")
@@ -688,7 +688,7 @@ public class LogPlayerComponent extends JComponent {
       long localOffset = 0;
       long logOffset = 0;
       long last_e_utime = 0;
-      Scalar lastspeed = RealScalar.ZERO;
+      BigFraction lastspeed = BigFraction.of(0, 1);
       synchronized (sync) {
         setPlaying(true);
       }
@@ -707,7 +707,7 @@ public class LogPlayerComponent extends JComponent {
           long now = System.nanoTime();
           long clockRelativeTime = now / 1000 - localOffset;
           // we don't support playback below a rate of 1/1024x
-          long speed_scale = (long) Math.max(1, (speed.number().doubleValue() * 1024.0));
+          long speed_scale = (long) Math.max(1, (speed.doubleValue() * 1024.0));
           long waitTime = (1024 * logRelativeTime / speed_scale - clockRelativeTime);
           long waitms = waitTime / 1000;
           waitms = Math.max(0, waitms);
