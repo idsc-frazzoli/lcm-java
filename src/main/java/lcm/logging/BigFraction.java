@@ -1,4 +1,5 @@
 // code by jph
+// class is a modified version of ch.ethz.idsc.tensor.BigFraction
 package lcm.logging;
 
 import java.io.Serializable;
@@ -104,6 +105,10 @@ import java.util.Objects;
     return num.equals(bigFraction.num) && den.equals(bigFraction.den); // sufficient since in normal form
   }
 
+  public double doubleValue() {
+    return num.doubleValue() / den.doubleValue();
+  }
+
   /***************************************************/
   @Override // from Object
   public int hashCode() {
@@ -111,7 +116,8 @@ import java.util.Objects;
   }
   // intentional: no override of Object::equals
 
-  public double doubleValue() {
-    return num.doubleValue() / den.doubleValue();
+  @Override
+  public String toString() {
+    return den.equals(BigInteger.ONE) ? "" + num : num + "/" + den;
   }
 }

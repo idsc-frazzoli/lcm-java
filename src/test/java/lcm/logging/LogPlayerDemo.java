@@ -14,8 +14,8 @@ enum LogPlayerDemo {
     // ---
     LogPlayerConfig cfg = new LogPlayerConfig();
     cfg.logFile = url.getFile();
-    cfg.numerator = 1;
-    cfg.denominator = 64;
+    cfg.speed_numerator = 1;
+    cfg.speed_denominator = 64;
     LogPlayer lp = LogPlayer.create(cfg);
     Thread.sleep(3000);
     lp.close();

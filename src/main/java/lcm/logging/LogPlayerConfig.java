@@ -9,11 +9,11 @@ public class LogPlayerConfig {
   public int optind;
   public String channelFilterRegex = null;
   public boolean invertChannelFilter = false;
-  public int numerator = 1;
-  public int denominator = 1;
+  public int speed_numerator = 1;
+  public int speed_denominator = 1;
 
   /** @return fraction numerator / denominator */
   /* package */ BigFraction speed() {
-    return BigFraction.of(numerator, denominator);
+    return BigFraction.of(speed_numerator, speed_denominator);
   }
 }
