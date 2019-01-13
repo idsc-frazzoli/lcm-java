@@ -123,28 +123,28 @@ public final class LCMDataInputStream implements DataInput {
 
   @Override
   public String readLine() throws IOException {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder stringBuilder = new StringBuilder();
     while (true) {
       needInput(1);
       byte v = buf[pos++];
       if (v == 0)
         break;
-      sb.append((char) v);
+      stringBuilder.append((char) v);
     }
-    return sb.toString();
+    return stringBuilder.toString();
   }
 
   /** Read a string of 8-bit characters terminated by a zero. The zero is
    * consumed. **/
   public String readStringZ() {
-    StringBuffer sb = new StringBuffer();
+    StringBuilder stringBuilder = new StringBuilder();
     while (true) {
       int v = buf[pos++] & 0xff;
       if (v == 0)
         break;
-      sb.append((char) v);
+      stringBuilder.append((char) v);
     }
-    return sb.toString();
+    return stringBuilder.toString();
   }
 
   @Override

@@ -32,6 +32,7 @@ Autonomous Gokart
 
 * in Spy: display of total data rate; alignments of columns
 * in LogPlayer: file chooser dialog
+* class discovery for jar files
 
 ## General Setup
 

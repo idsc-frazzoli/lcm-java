@@ -189,7 +189,7 @@ public class TableSorter extends AbstractTableModel {
     Directive directive = getDirective(column);
     if (directive == EMPTY_DIRECTIVE)
       return null;
-    return new Arrow(directive.direction == DESCENDING, size, sortingColumns.indexOf(directive));
+    return new ArrowIcon(directive.direction == DESCENDING, size, sortingColumns.indexOf(directive));
   }
 
   private void cancelSorting() {
@@ -415,14 +415,14 @@ public class TableSorter extends AbstractTableModel {
 
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-      Component c = tableCellRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-      if (c instanceof JLabel) {
-        JLabel l = (JLabel) c;
-        l.setHorizontalTextPosition(JLabel.LEFT);
+      Component component = tableCellRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+      if (component instanceof JLabel) {
+        JLabel jLabel = (JLabel) component;
+        jLabel.setHorizontalTextPosition(JLabel.LEFT);
         int modelColumn = table.convertColumnIndexToModel(column);
-        l.setIcon(getHeaderRendererIcon(modelColumn, l.getFont().getSize()));
+        jLabel.setIcon(getHeaderRendererIcon(modelColumn, jLabel.getFont().getSize()));
       }
-      return c;
+      return component;
     }
   }
 

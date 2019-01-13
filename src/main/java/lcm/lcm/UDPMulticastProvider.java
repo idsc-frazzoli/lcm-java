@@ -157,16 +157,18 @@ public class UDPMulticastProvider implements Provider {
   }
 
   class FragmentBuffer {
-    SocketAddress from = null;
-    String channel = null;
-    int msgSeqNumber = 0;
-    int data_size = 0;
-    int fragments_remaining = 0;
-    byte[] data = null;
-    boolean frag_received[];
+    final SocketAddress socketAddress;
+    final String channel;
+    final int msgSeqNumber;
+    final int data_size;
+    int fragments_remaining;
+    final byte[] data;
+    final boolean frag_received[];
 
-    FragmentBuffer(SocketAddress from, String channel, int msgSeqNumber, int data_size, int fragments_remaining) {
-      this.from = from;
+    FragmentBuffer( //
+        SocketAddress socketAddress, String channel, //
+        int msgSeqNumber, int data_size, int fragments_remaining) {
+      this.socketAddress = socketAddress;
       this.channel = channel;
       this.msgSeqNumber = msgSeqNumber;
       this.data_size = data_size;
@@ -184,11 +186,11 @@ public class UDPMulticastProvider implements Provider {
 
     @Override
     public void run() {
-      DatagramPacket packet = new DatagramPacket(new byte[65536], 65536);
+      DatagramPacket datagramPacket = new DatagramPacket(new byte[65536], 65536);
       while (!isInterrupted()) {
         try {
-          multicastSocket.receive(packet);
-          handlePacket(packet);
+          multicastSocket.receive(datagramPacket);
+          handlePacket(datagramPacket);
         } catch (IOException ex) {
           System.err.println("ex: " + ex);
           continue;
@@ -202,7 +204,7 @@ public class UDPMulticastProvider implements Provider {
       multicastSocket.close();
     }
 
-    void handleShortMessage(DatagramPacket packet, LCMDataInputStream ins) throws IOException {
+    void handleShortMessage(DatagramPacket datagramPacket, LCMDataInputStream ins) throws IOException {
       @SuppressWarnings("unused")
       int msgSeqNumber = ins.readInt();
       String channel = ins.readStringZ();
@@ -211,63 +213,62 @@ public class UDPMulticastProvider implements Provider {
 
     void handleFragment(DatagramPacket packet, LCMDataInputStream ins) throws IOException {
       int msgSeqNumber = ins.readInt();
-      int msg_size = ins.readInt() & 0xffffffff;
-      int fragment_offset = ins.readInt() & 0xffffffff;
+      int msg_size = ins.readInt(); // & 0xffffffff;
+      int fragment_offset = ins.readInt(); // & 0xffffffff;
       int fragment_id = ins.readShort() & 0xffff;
       int fragments_in_msg = ins.readShort() & 0xffff;
       // read entire packet payload
       byte payload[] = new byte[ins.available()];
       ins.readFully(payload);
-      if (ins.available() > 0) {
-        System.err.println("Unread data! " + ins.available());
-      }
+      // if (0 < ins.available())
+      // System.err.println("Unread data! " + ins.available());
       int data_start = 0;
       int frag_size = payload.length;
-      SocketAddress from = packet.getSocketAddress();
-      FragmentBuffer fbuf = fragBufs.get(from);
-      if (fbuf != null && ((fbuf.msgSeqNumber != msgSeqNumber) || (fbuf.data_size != msg_size))) {
-        fragBufs.remove(fbuf.from);
-        fbuf = null;
+      SocketAddress socketAddress = packet.getSocketAddress();
+      FragmentBuffer fragmentBuffer = fragBufs.get(socketAddress);
+      if (fragmentBuffer != null && ((fragmentBuffer.msgSeqNumber != msgSeqNumber) || (fragmentBuffer.data_size != msg_size))) {
+        fragBufs.remove(fragmentBuffer.socketAddress);
+        fragmentBuffer = null;
       }
-      if (null == fbuf && 0 == fragment_id) {
+      if (null == fragmentBuffer && 0 == fragment_id) {
         // extract channel name
         int channel_len = 0;
-        for (; channel_len < payload.length; channel_len++)
+        for (; channel_len < payload.length; ++channel_len)
           if (0 == payload[channel_len])
             break;
         data_start = channel_len + 1;
         frag_size -= channel_len + 1;
         String channel = new String(payload, 0, channel_len, "US-ASCII");
-        fbuf = new FragmentBuffer(from, channel, msgSeqNumber, msg_size, fragments_in_msg);
-        fragBufs.put(fbuf.from, fbuf);
+        fragmentBuffer = new FragmentBuffer(socketAddress, channel, msgSeqNumber, msg_size, fragments_in_msg);
+        fragBufs.put(fragmentBuffer.socketAddress, fragmentBuffer);
       }
-      if (null == fbuf) {
+      if (null == fragmentBuffer) {
         // TODO
         return;
       }
-      if (fragment_offset + frag_size > fbuf.data_size) {
+      if (fragment_offset + frag_size > fragmentBuffer.data_size) {
         System.err.println("LC: dropping invalid fragment");
-        fragBufs.remove(fbuf.from);
+        fragBufs.remove(fragmentBuffer.socketAddress);
         return;
       }
-      if (!fbuf.frag_received[fragment_id]) {
-        fbuf.frag_received[fragment_id] = true;
-        System.arraycopy(payload, data_start, fbuf.data, fragment_offset, frag_size);
-        fbuf.fragments_remaining--;
+      if (!fragmentBuffer.frag_received[fragment_id]) {
+        fragmentBuffer.frag_received[fragment_id] = true;
+        System.arraycopy(payload, data_start, fragmentBuffer.data, fragment_offset, frag_size);
+        --fragmentBuffer.fragments_remaining;
       }
-      if (0 == fbuf.fragments_remaining) {
-        lcm.receiveMessage(fbuf.channel, fbuf.data, 0, fbuf.data_size);
-        fragBufs.remove(fbuf.from);
+      if (0 == fragmentBuffer.fragments_remaining) {
+        lcm.receiveMessage(fragmentBuffer.channel, fragmentBuffer.data, 0, fragmentBuffer.data_size);
+        fragBufs.remove(fragmentBuffer.socketAddress);
       }
     }
 
-    void handlePacket(DatagramPacket packet) throws IOException {
-      LCMDataInputStream ins = new LCMDataInputStream(packet.getData(), packet.getOffset(), packet.getLength());
+    void handlePacket(DatagramPacket datagramPacket) throws IOException {
+      LCMDataInputStream ins = new LCMDataInputStream(datagramPacket.getData(), datagramPacket.getOffset(), datagramPacket.getLength());
       int magic = ins.readInt();
       if (magic == MAGIC_SHORT) {
-        handleShortMessage(packet, ins);
+        handleShortMessage(datagramPacket, ins);
       } else if (magic == MAGIC_LONG) {
-        handleFragment(packet, ins);
+        handleFragment(datagramPacket, ins);
       } else {
         System.err.println("bad magic: " + Integer.toHexString(magic));
       }
