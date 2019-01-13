@@ -5,7 +5,6 @@ import java.io.File;
 
 import lcm.logging.Log.Event;
 
-// TODO make this a proper class
 enum LogEventExtract {
   ;
   public static void main(String[] args) throws Exception {

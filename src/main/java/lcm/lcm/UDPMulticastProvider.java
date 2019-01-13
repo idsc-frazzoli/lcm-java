@@ -211,7 +211,7 @@ public class UDPMulticastProvider implements Provider {
       lcm.receiveMessage(channel, ins.getBuffer(), ins.getBufferOffset(), ins.available());
     }
 
-    void handleFragment(DatagramPacket packet, LCMDataInputStream ins) throws IOException {
+    void handleFragment(DatagramPacket datagramPacket, LCMDataInputStream ins) throws IOException {
       int msgSeqNumber = ins.readInt();
       int msg_size = ins.readInt(); // & 0xffffffff;
       int fragment_offset = ins.readInt(); // & 0xffffffff;
@@ -224,29 +224,29 @@ public class UDPMulticastProvider implements Provider {
       // System.err.println("Unread data! " + ins.available());
       int data_start = 0;
       int frag_size = payload.length;
-      SocketAddress socketAddress = packet.getSocketAddress();
+      SocketAddress socketAddress = datagramPacket.getSocketAddress();
       FragmentBuffer fragmentBuffer = fragBufs.get(socketAddress);
+      // TODO arrangement of conditions not nice
       if (fragmentBuffer != null && ((fragmentBuffer.msgSeqNumber != msgSeqNumber) || (fragmentBuffer.data_size != msg_size))) {
         fragBufs.remove(fragmentBuffer.socketAddress);
         fragmentBuffer = null;
       }
-      if (null == fragmentBuffer && 0 == fragment_id) {
-        // extract channel name
-        int channel_len = 0;
-        for (; channel_len < payload.length; ++channel_len)
-          if (0 == payload[channel_len])
-            break;
-        data_start = channel_len + 1;
-        frag_size -= channel_len + 1;
-        String channel = new String(payload, 0, channel_len, "US-ASCII");
-        fragmentBuffer = new FragmentBuffer(socketAddress, channel, msgSeqNumber, msg_size, fragments_in_msg);
-        fragBufs.put(fragmentBuffer.socketAddress, fragmentBuffer);
-      }
-      if (null == fragmentBuffer) {
-        // TODO
-        return;
-      }
-      if (fragment_offset + frag_size > fragmentBuffer.data_size) {
+      if (Objects.isNull(fragmentBuffer))
+        if (0 == fragment_id) {
+          // extract channel name
+          int channel_len = 0;
+          for (; channel_len < payload.length; ++channel_len)
+            if (0 == payload[channel_len])
+              break;
+          data_start = channel_len + 1;
+          frag_size -= channel_len + 1;
+          String channel = new String(payload, 0, channel_len, "US-ASCII");
+          fragmentBuffer = new FragmentBuffer(socketAddress, channel, msgSeqNumber, msg_size, fragments_in_msg);
+          fragBufs.put(fragmentBuffer.socketAddress, fragmentBuffer);
+        } else
+          return;
+      // ---
+      if (fragmentBuffer.data_size < fragment_offset + frag_size) {
         System.err.println("LC: dropping invalid fragment");
         fragBufs.remove(fragmentBuffer.socketAddress);
         return;
