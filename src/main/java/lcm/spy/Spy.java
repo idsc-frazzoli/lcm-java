@@ -41,17 +41,17 @@ import lcm.util.TableSorter;
 public class Spy {
   private LCM lcm;
   final LcmTypeDatabase lcmTypeDatabase; // accessed in UniversalSubscriber
-  Map<String, ChannelData> channelMap = new HashMap<>();
-  List<ChannelData> channelList = new ArrayList<>();
-  ChannelTableModel _channelTableModel = new ChannelTableModel(channelList);
-  TableSorter channelTableModel = new TableSorter(_channelTableModel);
-  JTable channelTable = new JTable(channelTableModel);
-  ChartData chartData;
-  private List<SpyPlugin> plugins = new ArrayList<>();
+  final Map<String, ChannelData> channelMap = new HashMap<>();
+  final List<ChannelData> channelList = new ArrayList<>();
+  final ChannelTableModel _channelTableModel = new ChannelTableModel(channelList);
+  final TableSorter channelTableModel = new TableSorter(_channelTableModel);
+  final JTable channelTable = new JTable(channelTableModel);
+  final ChartData chartData;
+  private final List<SpyPlugin> plugins = new ArrayList<>();
   public final JFrame jFrame = new JFrame("LCM Spy");
-  private JButton clearButton = new JButton("Clear");
-  private HzThread hzThread; // Added by Jen
-  JLabel jLabelInfo = new JLabel();
+  private final JButton clearButton = new JButton("Clear");
+  private final HzThread hzThread; // Added by Jen
+  final JLabel jLabelInfo = new JLabel();
   long totalBytes = 0;
   long totalBytesRate = 0;
 
@@ -115,23 +115,21 @@ public class Spy {
     });
     channelTable.addMouseListener(new MouseAdapter() {
       @Override
-      @SuppressWarnings("unused")
       public void mouseClicked(MouseEvent mouseEvent) {
-        int mods = mouseEvent.getModifiersEx();
-        if (mouseEvent.getButton() == 3) {
+        if (mouseEvent.getButton() == MouseEvent.BUTTON3)
           showPopupMenu(mouseEvent);
-        } else if (mouseEvent.getClickCount() == 2) {
-          Point p = mouseEvent.getPoint();
-          int row = rowAtPoint(p);
-          ChannelData cd = channelList.get(row);
+        else //
+        if (mouseEvent.getClickCount() == 2) {
+          Point point = mouseEvent.getPoint();
+          int row = rowAtPoint(point);
+          ChannelData channelData = channelList.get(row);
           boolean got_one = false;
-          for (SpyPlugin plugin : plugins) {
-            if (!got_one && plugin.canHandle(cd.fingerprint)) {
+          for (SpyPlugin plugin : plugins)
+            if (!got_one && plugin.canHandle(channelData.fingerprint)) {
               // start the plugin
-              new PluginStarter(plugin, cd).getAction().actionPerformed(null);
+              new PluginStarter(plugin, channelData).getAction().actionPerformed(null);
               got_one = true;
             }
-          }
           if (!got_one)
             createViewer(channelList.get(row));
         }
@@ -141,7 +139,7 @@ public class Spy {
       @Override
       public void windowClosed(WindowEvent windowEvent) {
         System.out.println("Spy quitting");
-        close(); // Added by Jen
+        close(); // added by Jen
       }
     });
     ClassDiscovery.execute(ClassPaths.getDefault(), new PluginClassVisitor());
@@ -153,14 +151,7 @@ public class Spy {
   }
 
   public void close() {
-    // use try because user might close the window itself
-    try {
-      // FIXME close should only be called from a spy that is Standalone
-      // lcm.close(); // Added by Jen
-    } catch (Exception exception) {
-      // ---
-    }
-    hzThread.interrupt(); // Added by Jen
+    hzThread.interrupt(); // added by Jen
     // ---
     jFrame.setVisible(false);
     jFrame.dispose();
@@ -173,40 +164,40 @@ public class Spy {
       for (Class<?> iface : interfaces)
         if (iface.equals(SpyPlugin.class))
           try {
-            Constructor<?> c = cls.getConstructor(new Class[0]);
-            SpyPlugin plugin = (SpyPlugin) c.newInstance(new Object[0]);
+            Constructor<?> constructor = cls.getConstructor(new Class[0]);
+            SpyPlugin plugin = (SpyPlugin) constructor.newInstance(new Object[0]);
             plugins.add(plugin);
-          } catch (Exception ex) {
-            System.out.println("ex: " + ex);
+          } catch (Exception exception) {
+            System.out.println("ex: " + exception);
           }
     }
   }
 
-  void createViewer(ChannelData cd) {
-    if (cd.viewerFrame != null && !cd.viewerFrame.isVisible()) {
-      cd.viewerFrame.dispose();
-      cd.viewer = null;
+  void createViewer(ChannelData channelData) {
+    if (channelData.viewerFrame != null && !channelData.viewerFrame.isVisible()) {
+      channelData.viewerFrame.dispose();
+      channelData.viewer = null;
     }
-    if (cd.viewer == null) {
-      cd.viewerFrame = new JFrame(cd.name);
-      cd.viewer = new ObjectPanel(cd.name, chartData);
+    if (channelData.viewer == null) {
+      channelData.viewerFrame = new JFrame(channelData.name);
+      channelData.viewer = new ObjectPanel(channelData.name, chartData);
       // cd.viewer = new ObjectViewer(cd.name, cd.cls, null);
-      cd.viewerFrame.setLayout(new BorderLayout());
+      channelData.viewerFrame.setLayout(new BorderLayout());
       // default scroll speed is too slow, so increase it
-      JScrollPane viewerScrollPane = new JScrollPane(cd.viewer);
+      JScrollPane viewerScrollPane = new JScrollPane(channelData.viewer);
       viewerScrollPane.getVerticalScrollBar().setUnitIncrement(16);
       // we need to tell the viewer what its viewport is so that it can
       // make smart decisions about which elements are in view of the user
       // so it can avoid drawing items outside the view
-      cd.viewer.setViewport(viewerScrollPane.getViewport());
-      cd.viewerFrame.add(viewerScrollPane, BorderLayout.CENTER);
-      cd.viewer.setObject(cd.last, cd.last_utime);
+      channelData.viewer.setViewport(viewerScrollPane.getViewport());
+      channelData.viewerFrame.add(viewerScrollPane, BorderLayout.CENTER);
+      channelData.viewer.setObject(channelData.last, channelData.last_utime);
       // jdp.add(cd.viewerFrame);
-      cd.viewerFrame.setSize(650, 400);
-      cd.viewerFrame.setLocationByPlatform(true);
-      cd.viewerFrame.setVisible(true);
+      channelData.viewerFrame.setSize(650, 400);
+      channelData.viewerFrame.setLocationByPlatform(true);
+      channelData.viewerFrame.setVisible(true);
     } else {
-      cd.viewerFrame.setVisible(true);
+      channelData.viewerFrame.setVisible(true);
       // cd.viewerFrame.moveToFront();
     }
   }
@@ -216,66 +207,63 @@ public class Spy {
   }
 
   class DefaultViewer extends AbstractAction {
-    ChannelData cd;
+    final ChannelData channelData;
 
-    public DefaultViewer(ChannelData cd) {
+    public DefaultViewer(ChannelData channelData) {
       super("Structure Viewer...");
-      this.cd = cd;
+      this.channelData = channelData;
     }
 
     @Override
-    public void actionPerformed(ActionEvent e) {
-      createViewer(cd);
+    public void actionPerformed(ActionEvent actionEvent) {
+      createViewer(channelData);
     }
   }
 
-  int rowAtPoint(Point p) {
-    int physicalRow = channelTable.rowAtPoint(p);
+  int rowAtPoint(Point point) {
+    int physicalRow = channelTable.rowAtPoint(point);
     return channelTableModel.modelIndex(physicalRow);
   }
 
-  public void showPopupMenu(MouseEvent e) {
-    Point p = e.getPoint();
-    int row = rowAtPoint(p);
-    ChannelData cd = channelList.get(row);
-    JPopupMenu jm = new JPopupMenu("Viewers");
-    int prow = channelTable.rowAtPoint(p);
+  public void showPopupMenu(MouseEvent mouseEvent) {
+    Point point = mouseEvent.getPoint();
+    int row = rowAtPoint(point);
+    ChannelData channelData = channelList.get(row);
+    JPopupMenu jPopupMenu = new JPopupMenu("Viewers");
+    int prow = channelTable.rowAtPoint(point);
     channelTable.setRowSelectionInterval(prow, prow);
-    jm.add(new DefaultViewer(cd));
-    if (cd.cls != null) {
-      for (SpyPlugin plugin : plugins) {
-        if (plugin.canHandle(cd.fingerprint)) {
-          jm.add(new PluginStarter(plugin, cd).getAction());
-          // jm.add(plugin.getAction(this_desktop_pane, cd));
-        }
-      }
-    }
-    jm.show(channelTable, e.getX(), e.getY());
+    jPopupMenu.add(new DefaultViewer(channelData));
+    if (channelData.cls != null)
+      for (SpyPlugin spyPlugin : plugins)
+        if (spyPlugin.canHandle(channelData.fingerprint))
+          jPopupMenu.add(new PluginStarter(spyPlugin, channelData).getAction());
+    // jm.add(plugin.getAction(this_desktop_pane, cd));
+    jPopupMenu.show(channelTable, mouseEvent.getX(), mouseEvent.getY());
   }
 
   public static void main(String args[]) {
     LcmStaticHelper.checkJre();
     String lcmurl = null;
-    for (int optind = 0; optind < args.length; optind++) {
+    for (int optind = 0; optind < args.length; ++optind) {
       String c = args[optind];
-      if (c.equals("-h") || c.equals("--help")) {
+      if (c.equals("-h") || c.equals("--help"))
         StaticHelper.spyUsage();
-      } else if (c.equals("-l") || c.equals("--lcm-url") || c.startsWith("--lcm-url=")) {
+      else //
+      if (c.equals("-l") || c.equals("--lcm-url") || c.startsWith("--lcm-url=")) {
         String optarg = null;
-        if (c.startsWith("--lcm-url=")) {
+        if (c.startsWith("--lcm-url="))
           optarg = c.substring(10);
-        } else if (optind < args.length) {
-          optind++;
+        else //
+        if (optind < args.length) {
+          ++optind;
           optarg = args[optind];
         }
-        if (null == optarg) {
+        if (null == optarg)
           StaticHelper.spyUsage();
-        } else {
+        else
           lcmurl = optarg;
-        }
-      } else {
+      } else
         StaticHelper.spyUsage();
-      }
     }
     try {
       new Spy(lcmurl);

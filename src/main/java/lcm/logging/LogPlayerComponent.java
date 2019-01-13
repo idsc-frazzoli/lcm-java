@@ -64,11 +64,11 @@ public class LogPlayerComponent extends JComponent {
   private final JLabel timeLabel = new JLabel("Time 0.0s");
   private final JLabel actualSpeedLabel = new JLabel("1.0x");
   private final JLabel logName = new JLabel("---");
-  private PlayerThread player = null;
+  private PlayerThread playerThread = null;
   private LCM lcm;
   /** The time of the first event in the current log **/
   private long timeOffset = 0;
-  private JFileChooser jfc = new JFileChooser();
+  private JFileChooser jFileChooser = new JFileChooser();
   private String currentLogPath;
   /** an estimate of how many seconds there are in the file */
   private double total_seconds;
@@ -126,7 +126,7 @@ public class LogPlayerComponent extends JComponent {
     @Override
     public void execute(LogPlayerComponent lp) {
       if (toggle) {
-        if (player != null)
+        if (playerThread != null)
           doStop();
         else
           doPlay();
@@ -149,7 +149,7 @@ public class LogPlayerComponent extends JComponent {
 
     @Override
     public void execute(LogPlayerComponent lp) {
-      boolean player_was_running = (player != null);
+      boolean player_was_running = (playerThread != null);
       if (player_was_running)
         doStop();
       doSeek(pos);
@@ -334,8 +334,8 @@ public class LogPlayerComponent extends JComponent {
     isLaunched = false;
     // udpThread.interrupt();
     queueThread.interrupt();
-    if (player != null)
-      player.requestStop();
+    if (playerThread != null)
+      playerThread.requestStop();
   }
 
   class MyScrubberListener implements JScrubberListener {
@@ -431,12 +431,12 @@ public class LogPlayerComponent extends JComponent {
 
   void openDialog() {
     doStop();
-    jfc.setBounds(100, 100, 1000, 800);
-    int res = jfc.showOpenDialog(this);
+    jFileChooser.setBounds(100, 100, 1000, 800);
+    int res = jFileChooser.showOpenDialog(this);
     if (res != JFileChooser.APPROVE_OPTION)
       return;
     try {
-      setLog(jfc.getSelectedFile().getPath(), true);
+      setLog(jFileChooser.getSelectedFile().getPath(), true);
     } catch (IOException ex) {
       System.out.println("Exception: " + ex);
     }
@@ -599,9 +599,9 @@ public class LogPlayerComponent extends JComponent {
   private void doStop() {
     PlayerThread pptr;
     synchronized (sync) {
-      if (player == null)
+      if (playerThread == null)
         return;
-      pptr = player;
+      pptr = playerThread;
       pptr.requestStop();
     }
     try {
@@ -612,21 +612,21 @@ public class LogPlayerComponent extends JComponent {
   }
 
   private void doPlay() {
-    if (player != null)
+    if (playerThread != null)
       return;
-    player = new PlayerThread();
-    player.start();
+    playerThread = new PlayerThread();
+    playerThread.start();
   }
 
   private void doStep() {
-    if (player != null)
+    if (playerThread != null)
       return;
-    player = new PlayerThread(stepChannelField.getText());
-    player.start();
+    playerThread = new PlayerThread(stepChannelField.getText());
+    playerThread.start();
   }
 
   private void doSeek(double ratio) {
-    assert player == null;
+    assert playerThread == null;
     if (ratio < 0)
       ratio = 0;
     if (ratio > 1)
@@ -768,7 +768,7 @@ public class LogPlayerComponent extends JComponent {
       }
       synchronized (sync) {
         setPlaying(false);
-        player = null;
+        playerThread = null;
       }
     }
   }

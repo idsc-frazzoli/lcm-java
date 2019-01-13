@@ -44,8 +44,8 @@ class JScrubber extends JComponent {
     double position;
     int type;
 
-    Bookmark(double p, int type) {
-      this.position = p;
+    Bookmark(double position, int type) {
+      this.position = position;
       this.type = type;
     }
   }
@@ -339,17 +339,22 @@ class JScrubber extends JComponent {
     // now we've updated geometry, maybe we don't need to draw.
     if (Math.abs(getX(position) - lastDrawX) > 1 || Math.abs(getX2(position) - lastDrawX2) > 1)
       repaint();
-    for (Bookmark b : bookmarks) {
-      if (b.type == BOOKMARK_RREPEAT && b.position > oldpos && b.position <= pos) {
+    for (Bookmark bookmark : bookmarks) {
+      if (bookmark.type == BOOKMARK_RREPEAT && //
+          bookmark.position > oldpos && //
+          bookmark.position <= pos) {
         Bookmark lrepeat = null;
         // find most recent LREPEAT
-        for (Bookmark bl : bookmarks) {
-          if (bl.position < b.position && bl.type == BOOKMARK_LREPEAT && (lrepeat == null || bl.position > lrepeat.position))
+        for (Bookmark bl : bookmarks)
+          if (bl.position < bookmark.position && //
+              bl.type == BOOKMARK_LREPEAT && //
+              (lrepeat == null || bl.position > lrepeat.position))
             lrepeat = bl;
-        }
-        double lposition = (lrepeat == null) ? 0 : lrepeat.position;
-        for (JScrubberListener l : listeners) {
-          l.scrubberPassedRepeat(this, b.position, lposition);
+        double lposition = lrepeat == null //
+            ? 0
+            : lrepeat.position;
+        for (JScrubberListener jScrubberListener : listeners) {
+          jScrubberListener.scrubberPassedRepeat(this, bookmark.position, lposition);
         }
       }
     }
@@ -361,10 +366,10 @@ class JScrubber extends JComponent {
     Bookmark findBookmark(double position, double tolerance) {
       double minerr = tolerance;
       Bookmark best = null;
-      for (Bookmark b : bookmarks) {
-        double thiserr = Math.abs(position - b.position);
+      for (Bookmark bookmark : bookmarks) {
+        double thiserr = Math.abs(position - bookmark.position);
         if (thiserr < minerr) {
-          best = b;
+          best = bookmark;
           minerr = thiserr;
         }
       }
@@ -372,17 +377,17 @@ class JScrubber extends JComponent {
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
-      mouseDownRow = getRow(e.getX(), e.getY());
-      double position = getPosition(e.getX(), e.getY(), mouseDownRow);
-      double tolerance = getPosition(e.getX() + CLICK_CLOSENESS, e.getY(), mouseDownRow) - position;
-      if (e.getButton() == 3) {
+    public void mousePressed(MouseEvent mouseEvent) {
+      mouseDownRow = getRow(mouseEvent.getX(), mouseEvent.getY());
+      double position = getPosition(mouseEvent.getX(), mouseEvent.getY(), mouseDownRow);
+      double tolerance = getPosition(mouseEvent.getX() + CLICK_CLOSENESS, mouseEvent.getY(), mouseDownRow) - position;
+      if (mouseEvent.getButton() == MouseEvent.BUTTON3) {
         trackbookmark = findBookmark(position, tolerance);
       }
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
+    public void mouseReleased(MouseEvent mouseEvent) {
       if (trackbookmark != null) {
         if (trackbookmark.position == 0 || trackbookmark.position == 1) {
           bookmarks.remove(trackbookmark);
@@ -394,8 +399,8 @@ class JScrubber extends JComponent {
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-      int mods = e.getModifiersEx();
+    public void mouseClicked(MouseEvent mouseEvent) {
+      int mods = mouseEvent.getModifiersEx();
       boolean shift = (mods & MouseEvent.SHIFT_DOWN_MASK) > 0;
       boolean ctrl = (mods & MouseEvent.CTRL_DOWN_MASK) > 0;
       boolean alt = shift & ctrl;
@@ -403,18 +408,18 @@ class JScrubber extends JComponent {
       shift = shift & (!alt);
       @SuppressWarnings("unused")
       boolean nomods = !(shift | ctrl | alt);
-      double tolerance = getPosition(e.getX() + CLICK_CLOSENESS, e.getY()) - position;
-      double position = getPosition(e.getX(), e.getY());
-      if (e.getButton() == 1) {
+      double tolerance = getPosition(mouseEvent.getX() + CLICK_CLOSENESS, mouseEvent.getY()) - position;
+      double position = getPosition(mouseEvent.getX(), mouseEvent.getY());
+      if (mouseEvent.getButton() == 1) {
         Bookmark nearest = findBookmark(position, tolerance);
         if (nearest == null)
           userSet(position);
         else
           userSet(nearest.position);
       }
-      if (e.getButton() == 3) {
+      if (mouseEvent.getButton() == 3) {
         popupPosition = position;
-        popupMenu.show(JScrubber.this, e.getX(), e.getY());
+        popupMenu.show(JScrubber.this, mouseEvent.getX(), mouseEvent.getY());
         /* int err = Math.abs(e.getX() - getX(position));
          * 
          * // if they clicked near the current cursor, create // a
@@ -431,16 +436,16 @@ class JScrubber extends JComponent {
     }
 
     @Override
-    public void mouseDragged(MouseEvent e) {
-      double position = getPosition(e.getX(), e.getY(), mouseDownRow);
+    public void mouseDragged(MouseEvent mouseEvent) {
+      double position = getPosition(mouseEvent.getX(), mouseEvent.getY(), mouseDownRow);
       if (mouseDownRow == 1)
         inhibitGeometryChanges = true;
       else
         inhibitGeometryChanges = false;
-      if ((e.getModifiers() & MouseEvent.BUTTON1_MASK) != 0) {
+      if ((mouseEvent.getModifiers() & MouseEvent.BUTTON1_MASK) != 0) {
         userSet(position);
       }
-      if ((e.getModifiers() & MouseEvent.BUTTON3_MASK) != 0) {
+      if ((mouseEvent.getModifiers() & MouseEvent.BUTTON3_MASK) != 0) {
         if (trackbookmark != null) {
           trackbookmark.position = position;
           repaint();

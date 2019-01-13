@@ -3,7 +3,6 @@
 package lcm.util;
 
 import java.io.EOFException;
-import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 
@@ -11,7 +10,7 @@ import java.io.RandomAccessFile;
 public class BufferedRandomAccessFile {
   private static final int BUFFER_SIZE = 32768; // must be power of two!
   // ---
-  private final RandomAccessFile raf;
+  private final RandomAccessFile randomAccessFile;
   /** buffer needs to be written back to disk? (If true, reads MUST use buffer.) */
   private boolean bufferDirty = false;
   private byte[] buffer = new byte[BUFFER_SIZE];
@@ -28,22 +27,15 @@ public class BufferedRandomAccessFile {
    * This position is always stored inside the buffer, or this position is the
    * byte after the current buffer (in which case the next read will re-fill
    * the buffer. */
-  // TODO one of the constructors is obsolete
-  public BufferedRandomAccessFile(File file, String mode) throws IOException {
-    raf = new RandomAccessFile(file, mode);
-    fileLength = raf.length();
-    bufferSeek(0);
-  }
-
   public BufferedRandomAccessFile(String path, String mode) throws IOException {
-    raf = new RandomAccessFile(path, mode);
-    fileLength = raf.length();
+    randomAccessFile = new RandomAccessFile(path, mode);
+    fileLength = randomAccessFile.length();
     bufferSeek(0);
   }
 
   public void close() throws IOException {
     flushBuffer();
-    raf.close();
+    randomAccessFile.close();
   }
 
   public long getFilePointer() {
@@ -70,8 +62,8 @@ public class BufferedRandomAccessFile {
   void flushBuffer() throws IOException {
     if (!bufferDirty)
       return;
-    raf.seek(bufferOffset);
-    raf.write(buffer, 0, bufferLength);
+    randomAccessFile.seek(bufferOffset);
+    randomAccessFile.write(buffer, 0, bufferLength);
     bufferDirty = false;
   }
 
@@ -89,8 +81,8 @@ public class BufferedRandomAccessFile {
       bufferLength = 0;
     bufferPosition = (int) (seekOffset - bufferOffset);
     // we always ask for an amount that should be exactly available.
-    raf.seek(bufferOffset);
-    raf.readFully(buffer, 0, bufferLength);
+    randomAccessFile.seek(bufferOffset);
+    randomAccessFile.readFully(buffer, 0, bufferLength);
     // System.out.printf("%08x %08x %08x %08x\n", seekOffset, bufferOffset,
     // bufferPosition, bufferLength);
   }
@@ -110,8 +102,8 @@ public class BufferedRandomAccessFile {
   public byte peek() throws IOException {
     if (bufferPosition < bufferLength)
       return buffer[bufferPosition];
-    raf.seek(bufferOffset + bufferPosition);
-    return raf.readByte();
+    randomAccessFile.seek(bufferOffset + bufferPosition);
+    return randomAccessFile.readByte();
   }
 
   public void write(int v) throws IOException {
@@ -232,8 +224,7 @@ public class BufferedRandomAccessFile {
       buffer[bufferPosition++] = v;
       return;
     }
-    // they're increasing the size of the file, but it still fits inside our
-    // buffer
+    // they're increasing the size of the file, but it still fits inside our buffer
     if (bufferLength < BUFFER_SIZE) {
       buffer[bufferPosition++] = v;
       bufferLength++;

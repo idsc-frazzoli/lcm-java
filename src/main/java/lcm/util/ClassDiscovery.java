@@ -65,12 +65,12 @@ public class ClassDiscovery {
     final String ps = System.getProperty("path.separator");
     String[] items = classpath.split(ps);
     // Create a class loader that has access to the whole class path.
-    URLClassLoader cldr;
+    URLClassLoader urlClassLoader;
     try {
       URL[] urls = new URL[items.length];
       for (int i = 0; i < items.length; ++i)
         urls[i] = new File(items[i]).toURI().toURL();
-      cldr = new URLClassLoader(urls);
+      urlClassLoader = new URLClassLoader(urls);
     } catch (IOException ex) {
       System.out.println("ClassDiscoverer ERR: " + ex);
       return;
@@ -92,7 +92,7 @@ public class ClassDiscovery {
               cn = cn.replace('\\', '.');
               // try loading that class
               try {
-                Class<?> cls = cldr.loadClass(cn);
+                Class<?> cls = urlClassLoader.loadClass(cn);
                 if (cls == null)
                   continue;
                 classVisitor.classFound(item, cls);
@@ -110,7 +110,7 @@ public class ClassDiscovery {
         File file = new File(item);
         if (!file.isDirectory())
           continue;
-        visitDirectory(cldr, item, file, "");
+        visitDirectory(urlClassLoader, item, file, "");
       }
     }
   }

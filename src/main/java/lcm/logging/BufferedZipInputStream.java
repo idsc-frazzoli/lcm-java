@@ -14,23 +14,23 @@ import lcm.util.BufferedRandomAccessFile;
  * 
  * @author anritter */
 public class BufferedZipInputStream {
-  private final ZipInputStream zis;
+  private final ZipInputStream zipInputStream;
 
   public BufferedZipInputStream(String path) throws IOException {
-    zis = new ZipInputStream(new FileInputStream(path));
-    ZipEntry entry = null;
-    while ((entry = zis.getNextEntry()) != null)
+    zipInputStream = new ZipInputStream(new FileInputStream(path));
+    ZipEntry zipEntry = null;
+    while ((zipEntry = zipInputStream.getNextEntry()) != null)
       // entry name must be equal to file name of path
-      if (path.endsWith(entry.getName() + ".zip"))
+      if (path.endsWith(zipEntry.getName() + ".zip"))
         break;
   }
 
   public void close() throws IOException {
-    zis.close();
+    zipInputStream.close();
   }
 
   public final int read() throws IOException {
-    int byteRead = zis.read();
+    int byteRead = zipInputStream.read();
     if (byteRead == -1)
       throw new EOFException("EOF");
     return byteRead & 0xff;
@@ -52,7 +52,7 @@ public class BufferedZipInputStream {
   }
 
   public void readFully(byte[] b, int offset, int length) throws IOException {
-    int numRead = zis.read(b, offset, length);
+    int numRead = zipInputStream.read(b, offset, length);
     if (numRead == -1)
       throw new EOFException("EOF");
     if (numRead != length) // happens. Read again remaining bytes.
