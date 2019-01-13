@@ -89,29 +89,29 @@ public class TCPService {
   }
 
   class ClientThread extends Thread {
-    Socket sock;
-    DataInputStream ins;
-    DataOutputStream outs;
+    Socket socket;
+    DataInputStream dataInputStream;
+    DataOutputStream dataOutputStream;
 
     class SubscriptionRecord {
       String regex;
-      Pattern pat;
+      Pattern pattern;
 
       SubscriptionRecord(String regex) {
         this.regex = regex;
-        this.pat = Pattern.compile(regex);
+        this.pattern = Pattern.compile(regex);
       }
     }
 
-    List<SubscriptionRecord> subscriptions = new ArrayList<>();
-    ReadWriteLock subscriptions_lock = new ReentrantReadWriteLock();
+    private final List<SubscriptionRecord> subscriptions = new ArrayList<>();
+    private final ReadWriteLock subscriptions_lock = new ReentrantReadWriteLock();
 
-    public ClientThread(Socket sock) throws IOException {
-      this.sock = sock;
-      ins = new DataInputStream(sock.getInputStream());
-      outs = new DataOutputStream(sock.getOutputStream());
-      outs.writeInt(TCPProvider.MAGIC_SERVER);
-      outs.writeInt(TCPProvider.VERSION);
+    public ClientThread(Socket socket) throws IOException {
+      this.socket = socket;
+      dataInputStream = new DataInputStream(socket.getInputStream());
+      dataOutputStream = new DataOutputStream(socket.getOutputStream());
+      dataOutputStream.writeInt(TCPProvider.MAGIC_SERVER);
+      dataOutputStream.writeInt(TCPProvider.VERSION);
     }
 
     @Override
@@ -120,20 +120,20 @@ public class TCPService {
       // read messages until something bad happens.
       try {
         while (true) {
-          int type = ins.readInt();
+          int type = dataInputStream.readInt();
           if (type == TCPProvider.MESSAGE_TYPE_PUBLISH) {
-            int channellen = ins.readInt();
+            int channellen = dataInputStream.readInt();
             byte channel[] = new byte[channellen];
-            ins.readFully(channel);
-            int datalen = ins.readInt();
+            dataInputStream.readFully(channel);
+            int datalen = dataInputStream.readInt();
             byte data[] = new byte[datalen];
-            ins.readFully(data);
+            dataInputStream.readFully(data);
             TCPService.this.relay(channel, data);
             bytesCount += channellen + datalen + 8;
           } else if (type == TCPProvider.MESSAGE_TYPE_SUBSCRIBE) {
-            int channellen = ins.readInt();
+            int channellen = dataInputStream.readInt();
             byte channel[] = new byte[channellen];
-            ins.readFully(channel);
+            dataInputStream.readFully(channel);
             try {
               subscriptions_lock.writeLock().lock();
               subscriptions.add(new SubscriptionRecord(new String(channel)));
@@ -141,9 +141,9 @@ public class TCPService {
               subscriptions_lock.writeLock().unlock();
             }
           } else if (type == TCPProvider.MESSAGE_TYPE_UNSUBSCRIBE) {
-            int channellen = ins.readInt();
+            int channellen = dataInputStream.readInt();
             byte channel[] = new byte[channellen];
-            ins.readFully(channel);
+            dataInputStream.readFully(channel);
             String re = new String(channel);
             try {
               subscriptions_lock.writeLock().lock();
@@ -177,21 +177,21 @@ public class TCPService {
     }
 
     public void closeResources() throws IOException {
-      sock.close();
+      socket.close();
     }
 
     public void send(String chanstr, byte channel[], byte data[]) {
       try {
         subscriptions_lock.readLock().lock();
         for (SubscriptionRecord sr : subscriptions) {
-          if (sr.pat.matcher(chanstr).matches()) {
-            synchronized (outs) {
-              outs.writeInt(TCPProvider.MESSAGE_TYPE_PUBLISH);
-              outs.writeInt(channel.length);
-              outs.write(channel);
-              outs.writeInt(data.length);
-              outs.write(data);
-              outs.flush();
+          if (sr.pattern.matcher(chanstr).matches()) {
+            synchronized (dataOutputStream) {
+              dataOutputStream.writeInt(TCPProvider.MESSAGE_TYPE_PUBLISH);
+              dataOutputStream.writeInt(channel.length);
+              dataOutputStream.write(channel);
+              dataOutputStream.writeInt(data.length);
+              dataOutputStream.write(data);
+              dataOutputStream.flush();
               return;
             }
           }

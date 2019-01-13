@@ -10,7 +10,7 @@ import lcm.logging.Log.Event;
 public class ZipLogEventReader {
   static final int LOG_MAGIC = 0xEDA1DA01;
   // ---
-  private final BufferedZipInputStream zis;
+  private final BufferedZipInputStream bufferedZipInputStream;
   private final String path;
 
   /** Opens a compressed log file for reading.
@@ -19,7 +19,7 @@ public class ZipLogEventReader {
    * the filename to open */
   public ZipLogEventReader(String path) throws IOException {
     this.path = path;
-    zis = new BufferedZipInputStream(path);
+    bufferedZipInputStream = new BufferedZipInputStream(path);
   }
 
   /** Retrieves the path to the log file.
@@ -39,14 +39,14 @@ public class ZipLogEventReader {
     int channellen = 0, datalen = 0;
     while (true) {
       // typically the cause of an exception at EOF
-      int v = zis.read() & 0xff;
+      int v = bufferedZipInputStream.read() & 0xff;
       magic = (magic << 8) | v;
       if (magic != LOG_MAGIC)
         continue;
-      event.eventNumber = zis.readLong();
-      event.utime = zis.readLong();
-      channellen = zis.readInt();
-      datalen = zis.readInt();
+      event.eventNumber = bufferedZipInputStream.readLong();
+      event.utime = bufferedZipInputStream.readLong();
+      channellen = bufferedZipInputStream.readInt();
+      datalen = bufferedZipInputStream.readInt();
       if (channellen <= 0 || datalen <= 0 || channellen >= 256 || datalen >= 16 * 1024 * 1024) {
         System.out.printf("Bad log event eventnumber = 0x%08x utime = 0x%08x channellen = 0x%08x datalen=0x%08x\n", event.eventNumber, event.utime, channellen,
             datalen);
@@ -56,14 +56,14 @@ public class ZipLogEventReader {
     }
     byte bchannel[] = new byte[channellen];
     event.data = new byte[datalen];
-    zis.readFully(bchannel);
+    bufferedZipInputStream.readFully(bchannel);
     event.channel = new String(bchannel);
-    zis.readFully(event.data);
+    bufferedZipInputStream.readFully(event.data);
     return event;
   }
 
   /** Closes the log file and releases and system resources used by it. */
   public synchronized void close() throws IOException {
-    zis.close();
+    bufferedZipInputStream.close();
   }
 }

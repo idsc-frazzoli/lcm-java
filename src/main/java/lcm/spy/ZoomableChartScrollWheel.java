@@ -30,34 +30,38 @@ import info.monitorenter.gui.chart.traces.Trace2DLtd;
 
 /** Chart that supports panning and zooming in the Google-maps style. */
 public class ZoomableChartScrollWheel extends ZoomableChart {
-  private double mouseDownStartX, mouseDownStartY, mouseDownValPerPxX, mouseDownMinX, mouseDownMaxX;
-  private List<Double> mouseDownValPerPxY = new ArrayList<>();
-  private List<Double> mouseDownMinY = new ArrayList<>();
-  private List<Double> mouseDownMaxY = new ArrayList<>();
+  private double mouseDownStartX;
+  private double mouseDownStartY;
+  private double mouseDownValPerPxX;
+  private double mouseDownMinX;
+  private double mouseDownMaxX;
+  private final List<Double> mouseDownValPerPxY = new ArrayList<>();
+  private final List<Double> mouseDownMinY = new ArrayList<>();
+  private final List<Double> mouseDownMaxY = new ArrayList<>();
   private long lastFocusTime = -1;
-  private JFrame frame = null;
+  private JFrame jFrame = null;
   // internal color list
-  private List<Color> colors = new ArrayList<>();
+  private final List<Color> colors = new ArrayList<>();
   // color index
   private int colorNum = 0;
   // we need a list of the axes on the right, which we update ourselves
   @SuppressWarnings("rawtypes")
-  private List<AAxis> rightYAxis = new ArrayList<>();
+  private final List<AAxis> rightYAxis = new ArrayList<>();
   private JPopupMenu popup = new JPopupMenu();
-  ChartData chartData;
+  private final ChartData chartData;
 
   /** Constructor, taking in a chartData so that we can set up the chart
    * 
    * @param chartData
    * global data about all charts displayed in lcm-spy */
   public ZoomableChartScrollWheel(ChartData chartData) {
-    this.addMouseWheelListener(new MyMouseWheelListener(this));
-    this.getAxisX().setPaintGrid(true);
-    this.getAxisY().setPaintGrid(true);
-    this.setUseAntialiasing(true);
-    this.setGridColor(Color.LIGHT_GRAY);
-    this.getAxisX().getAxisTitle().setTitle("Time (sec)");
-    this.getAxisY().getAxisTitle().setTitle("");
+    addMouseWheelListener(new MyMouseWheelListener(this));
+    getAxisX().setPaintGrid(true);
+    getAxisY().setPaintGrid(true);
+    setUseAntialiasing(true);
+    setGridColor(Color.LIGHT_GRAY);
+    getAxisX().getAxisTitle().setTitle("Time (sec)");
+    getAxisY().getAxisTitle().setTitle("");
     this.chartData = chartData;
     colors.add(Color.RED);
     colors.add(Color.BLACK);
@@ -66,8 +70,8 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
     colors.add(Color.CYAN);
     colors.add(Color.ORANGE);
     colors.add(Color.GREEN);
-    this.setFixedWidthXAxisFormat();
-    this.setMinPaintLatency(16); // cap the frame-rate at 60fps
+    setFixedWidthXAxisFormat();
+    setMinPaintLatency(16); // cap the frame-rate at 60fps
   }
 
   /** Creates a new frame for this trace. Called either by ObjectPanel to
@@ -90,10 +94,9 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
     newChart.addFrameFocusTimer(frame);
     frame.addWindowListener(new WindowAdapter() {
       @Override
-      public void windowClosing(WindowEvent e) {
-        for (ITrace2D trace : newChart.getTraces()) {
+      public void windowClosing(WindowEvent windowEvent) {
+        for (ITrace2D trace : newChart.getTraces())
           ((Trace2DLtd) trace).setMaxSize(ChartData.SPARKLINECHARTSIZE);
-        }
         chartData.getCharts().remove(newChart);
       }
     });
@@ -104,12 +107,12 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
 
   /** Shows the right-click menu if appropriate.
    * 
-   * @param e
+   * @param mouseEvent
    * MouseEvent to process
    * @return true if the right-click menu was shown */
-  private boolean maybeShowPopup(MouseEvent e) {
-    if (e.isPopupTrigger()) {
-      popup.show(e.getComponent(), e.getX(), e.getY());
+  private boolean maybeShowPopup(MouseEvent mouseEvent) {
+    if (mouseEvent.isPopupTrigger()) {
+      popup.show(mouseEvent.getComponent(), mouseEvent.getX(), mouseEvent.getY());
       return true;
     }
     return false;
@@ -121,13 +124,13 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
    * @return next color to use for a trace */
   public Color popColor() {
     Color thisColor = colors.get(colorNum % colors.size());
-    colorNum++;
+    ++colorNum;
     return thisColor;
   }
 
   /** Adds the newest trace color back onto the stack. */
   public void pushColor() {
-    colorNum--;
+    --colorNum;
   }
 
   /** Updates the right click menu to allow for moving traces around. Should be
@@ -136,10 +139,9 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
   public void updateRightClickMenu() {
     // zap the old right click menu
     popup = new JPopupMenu();
-    Iterator<ITrace2D> iter = this.getTraces().iterator();
     boolean firstFlag = true;
     StringBuilder frameTitle = new StringBuilder();
-    while (iter.hasNext()) {
+    for (Iterator<ITrace2D> iter = getTraces().iterator(); iter.hasNext();) {
       final ITrace2D trace = iter.next();
       JMenuItem topItem = new JMenuItem(trace.getName());
       topItem.setEnabled(false);
@@ -156,11 +158,11 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
           newItem.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-              ZoomableChartScrollWheel.this.removeAxisYRight(axis);
-              ZoomableChartScrollWheel.this.removeTrace(trace);
+              removeAxisYRight(axis);
+              removeTrace(trace);
               // rightYAxis.remove(axis);
-              ZoomableChartScrollWheel.this.addTrace(trace);
-              ZoomableChartScrollWheel.this.updateRightClickMenu();
+              addTrace(trace);
+              updateRightClickMenu();
             }
           });
           popup.add(newItem);
@@ -171,17 +173,17 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
       if (rightTraceFlag == false) {
         // this trace is on the normal Y axis
         JMenuItem newItem = new JMenuItem("    to separate axis");
-        if (this.getAxisY().getTraces().size() < 2) {
+        if (getAxisY().getTraces().size() < 2) {
           newItem.setEnabled(false);
         }
         newItem.addActionListener(new ActionListener() {
           @Override
           public void actionPerformed(ActionEvent e) {
             AxisLinear newAxis = new AxisLinear();
-            ZoomableChartScrollWheel.this.removeTrace(trace);
-            ZoomableChartScrollWheel.this.addAxisYRight(newAxis);
-            ZoomableChartScrollWheel.this.addTrace(trace, ZoomableChartScrollWheel.this.getAxisX(), newAxis);
-            ZoomableChartScrollWheel.this.updateRightClickMenu();
+            removeTrace(trace);
+            addAxisYRight(newAxis);
+            addTrace(trace, getAxisX(), newAxis);
+            updateRightClickMenu();
           }
         });
         popup.add(newItem);
@@ -192,13 +194,13 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
         public void actionPerformed(ActionEvent e) {
           for (AAxis axisL : rightYAxis) {
             if (axisL.getTraces().contains(trace)) {
-              ZoomableChartScrollWheel.this.removeAxisYRight(axisL);
+              removeAxisYRight(axisL);
               break;
             }
           }
-          ZoomableChartScrollWheel.this.removeTrace(trace);
-          ZoomableChartScrollWheel.this.updateRightClickMenu();
-          ZoomableChartScrollWheel.newChartFrame(chartData, trace);
+          removeTrace(trace);
+          updateRightClickMenu();
+          newChartFrame(chartData, trace);
         }
       });
       JMenuItem delItem = new JMenuItem("    remove");
@@ -207,29 +209,27 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
         public void actionPerformed(ActionEvent e) {
           for (AAxis axisL : rightYAxis) {
             if (axisL.getTraces().contains(trace)) {
-              ZoomableChartScrollWheel.this.removeAxisYRight(axisL);
+              removeAxisYRight(axisL);
               break;
             }
           }
-          ZoomableChartScrollWheel.this.removeTrace(trace);
-          ZoomableChartScrollWheel.this.updateRightClickMenu();
+          removeTrace(trace);
+          updateRightClickMenu();
         }
       });
-      if (this.getAxisX().getTraces().size() < 2) {
+      if (getAxisX().getTraces().size() < 2) {
         delItem.setEnabled(false);
         moveWindowItem.setEnabled(false);
       }
       popup.add(moveWindowItem);
       popup.add(delItem);
-      if (!firstFlag) {
+      if (!firstFlag)
         frameTitle.append(", ");
-      }
       frameTitle.append(trace.getName());
       firstFlag = false;
     }
-    if (this.frame != null) {
-      this.frame.setTitle(frameTitle.toString());
-    }
+    if (jFrame != null)
+      jFrame.setTitle(frameTitle.toString());
   }
 
   @Override
@@ -246,12 +246,12 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
 
   /** Move this frame to the front to get the user's attention */
   public void toFront() {
-    if (frame != null) {
+    if (jFrame != null) {
       java.awt.EventQueue.invokeLater(new Runnable() {
         @Override
         public void run() {
-          frame.toFront();
-          frame.repaint();
+          jFrame.toFront();
+          jFrame.repaint();
         }
       });
     }
@@ -260,11 +260,11 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
   /** Saves the time this window was last in focus. Allows us to put new traces
    * on the last chart that was in focus
    * 
-   * @param frame
+   * @param jFrame
    * frame to add the focus timer to */
-  public void addFrameFocusTimer(JFrame frame) {
-    this.frame = frame;
-    this.frame.addWindowFocusListener(new WindowFocusListener() {
+  public void addFrameFocusTimer(JFrame jFrame) {
+    this.jFrame = jFrame;
+    jFrame.addWindowFocusListener(new WindowFocusListener() {
       @Override
       public void windowGainedFocus(WindowEvent we) {
         lastFocusTime = System.nanoTime() / 1000;
@@ -369,7 +369,7 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
   private void setFixedWidthXAxisFormat() {
     DecimalFormat fixedWidthFormat = new DecimalFormat("#");
     LabelFormatterNumber fixedWidthFormatter = new LabelFormatterNumber(fixedWidthFormat);
-    this.getAxisX().setFormatter(fixedWidthFormatter);
+    getAxisX().setFormatter(fixedWidthFormatter);
   }
 
   /** When data is not "rolling in" use a varible format for maximum
@@ -377,7 +377,7 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
   private void setVariableWidthXAxisFormat() {
     DecimalFormat variableWidthFormat = new DecimalFormat();
     LabelFormatterNumber variableWidthFormatter = new LabelFormatterNumber(variableWidthFormat);
-    this.getAxisX().setFormatter(variableWidthFormatter);
+    getAxisX().setFormatter(variableWidthFormatter);
   }
 
   public class MyMouseWheelListener implements MouseWheelListener {

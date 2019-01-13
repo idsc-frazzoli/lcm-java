@@ -21,86 +21,85 @@ public class LogPlayer {
   public final LogPlayerComponent logPlayerComponent;
   public final JFrame jFrame = new JFrame("LogPlayer");
 
-  private LogPlayer(LogPlayerConfig cfg) throws IOException {
-    logPlayerComponent = new LogPlayerComponent(cfg.lcmurl, cfg.speed());
-    jFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+  private LogPlayer(LogPlayerConfig logPlayerConfig) throws IOException {
+    logPlayerComponent = new LogPlayerComponent(logPlayerConfig.lcmurl, logPlayerConfig.speed());
+    jFrame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
     jFrame.setLayout(new BorderLayout());
     jFrame.add(logPlayerComponent, BorderLayout.CENTER);
-    jFrame.pack();
-    jFrame.setSize(jFrame.getWidth(), 300);
     jFrame.addWindowListener(new WindowAdapter() {
       @Override
-      public void windowClosing(WindowEvent e) {
-        try {
-          // jan deactivated this to prevent the creation of a jlp file
-          // logPlayerComponent.savePreferences();
-        } catch (Exception exception) {
-          System.out.println("Couldn't save preferences: " + exception);
-        }
-        close();
+      public void windowClosed(WindowEvent windowEvent) {
+        logPlayerComponent.stopThreads();
       }
     });
-    jFrame.setVisible(true);
-    if (cfg.channelFilterRegex != null)
-      logPlayerComponent.setChannelFilter(cfg.channelFilterRegex);
-    if (cfg.invertChannelFilter)
+    if (logPlayerConfig.channelFilterRegex != null)
+      logPlayerComponent.setChannelFilter(logPlayerConfig.channelFilterRegex);
+    if (logPlayerConfig.invertChannelFilter)
       logPlayerComponent.invertChannelFilter();
-    if (cfg.logFile != null)
-      logPlayerComponent.setLog(cfg.logFile, !cfg.startPaused);
+    if (logPlayerConfig.logFile != null)
+      logPlayerComponent.setLog(logPlayerConfig.logFile, !logPlayerConfig.startPaused);
     else
       logPlayerComponent.openDialog();
   }
 
-  public void close() {
-    jFrame.dispose();
-    logPlayerComponent.stopThreads();
+  public void standalone() {
+    jFrame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    jFrame.setVisible(true);
   }
 
   public static void main(String args[]) throws IOException {
     LcmStaticHelper.checkJre();
-    LogPlayerConfig cfg = new LogPlayerConfig();
-    for (cfg.optind = 0; cfg.optind < args.length; cfg.optind++) {
-      String c = args[cfg.optind];
+    LogPlayerConfig logPlayerConfig = new LogPlayerConfig();
+    for (logPlayerConfig.optind = 0; logPlayerConfig.optind < args.length; logPlayerConfig.optind++) {
+      String c = args[logPlayerConfig.optind];
       if (c.equals("-h") || c.equals("--help")) {
         StaticHelper.usage();
-      } else if (c.equals("-l") || c.equals("--lcm-url") || c.startsWith("--lcm-url=")) {
+      } else //
+      if (c.equals("-l") || c.equals("--lcm-url") || c.startsWith("--lcm-url=")) {
         String optarg = null;
         if (c.startsWith("--lcm-url=")) {
           optarg = c.split("=")[1];
-        } else if (cfg.optind < args.length) {
-          cfg.optind++;
-          optarg = args[cfg.optind];
+        } else //
+        if (logPlayerConfig.optind < args.length) {
+          logPlayerConfig.optind++;
+          optarg = args[logPlayerConfig.optind];
         }
         if (null == optarg) {
           StaticHelper.usage();
         } else {
-          cfg.lcmurl = optarg;
+          logPlayerConfig.lcmurl = optarg;
         }
-      } else if (c.equals("-p") || c.equals("--paused")) {
-        cfg.startPaused = true;
-      } else if (c.equals("-f") || c.equals("--filter") || c.startsWith("--filter=")) {
+      } else //
+      if (c.equals("-p") || c.equals("--paused")) {
+        logPlayerConfig.startPaused = true;
+      } else //
+      if (c.equals("-f") || c.equals("--filter") || c.startsWith("--filter=")) {
         String optarg = null;
         if (c.startsWith("--filter=")) {
           optarg = c.split("=")[1];
-        } else if (cfg.optind < args.length) {
-          cfg.optind++;
-          optarg = args[cfg.optind];
+        } else //
+        if (logPlayerConfig.optind < args.length) {
+          logPlayerConfig.optind++;
+          optarg = args[logPlayerConfig.optind];
         }
         if (null == optarg) {
           StaticHelper.usage();
         } else {
-          cfg.channelFilterRegex = optarg;
+          logPlayerConfig.channelFilterRegex = optarg;
         }
-      } else if (c.equals("-v") || c.equals("--invert-filter")) {
-        cfg.invertChannelFilter = true;
-      } else if (c.startsWith("-")) {
+      } else //
+      if (c.equals("-v") || c.equals("--invert-filter")) {
+        logPlayerConfig.invertChannelFilter = true;
+      } else //
+      if (c.startsWith("-")) {
         StaticHelper.usage();
-      } else if (cfg.logFile != null) // there should only be 1 non-flag argument
+      } else //
+      if (logPlayerConfig.logFile != null) // there should only be 1 non-flag argument
         StaticHelper.usage();
       else {
-        cfg.logFile = c;
+        logPlayerConfig.logFile = c;
       }
     }
-    create(cfg);
+    create(logPlayerConfig);
   }
 }

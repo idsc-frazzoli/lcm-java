@@ -41,17 +41,17 @@ import lcm.util.TableSorter;
 public class Spy {
   private LCM lcm;
   final LcmTypeDatabase lcmTypeDatabase; // accessed in UniversalSubscriber
-  Map<String, ChannelData> channelMap = new HashMap<>();
-  List<ChannelData> channelList = new ArrayList<>();
-  ChannelTableModel _channelTableModel = new ChannelTableModel(channelList);
-  TableSorter channelTableModel = new TableSorter(_channelTableModel);
-  JTable channelTable = new JTable(channelTableModel);
-  ChartData chartData;
-  private List<SpyPlugin> plugins = new ArrayList<>();
+  final Map<String, ChannelData> channelMap = new HashMap<>();
+  final List<ChannelData> channelList = new ArrayList<>();
+  final ChannelTableModel _channelTableModel = new ChannelTableModel(channelList);
+  final TableSorter channelTableModel = new TableSorter(_channelTableModel);
+  final JTable channelTable = new JTable(channelTableModel);
+  final ChartData chartData;
+  private final List<SpyPlugin> plugins = new ArrayList<>();
   public final JFrame jFrame = new JFrame("LCM Spy");
-  private JButton clearButton = new JButton("Clear");
-  private HzThread hzThread; // Added by Jen
-  JLabel jLabelInfo = new JLabel();
+  private final JButton clearButton = new JButton("Clear");
+  private final HzThread hzThread; // Added by Jen
+  final JLabel jLabelInfo = new JLabel();
   long totalBytes = 0;
   long totalBytesRate = 0;
 
@@ -141,7 +141,7 @@ public class Spy {
       @Override
       public void windowClosed(WindowEvent windowEvent) {
         System.out.println("Spy quitting");
-        close(); // Added by Jen
+        close(); // added by Jen
       }
     });
     ClassDiscovery.execute(ClassPaths.getDefault(), new PluginClassVisitor());
@@ -153,14 +153,7 @@ public class Spy {
   }
 
   public void close() {
-    // use try because user might close the window itself
-    try {
-      // FIXME close should only be called from a spy that is Standalone
-      // lcm.close(); // Added by Jen
-    } catch (Exception exception) {
-      // ---
-    }
-    hzThread.interrupt(); // Added by Jen
+    hzThread.interrupt(); // added by Jen
     // ---
     jFrame.setVisible(false);
     jFrame.dispose();
