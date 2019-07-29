@@ -22,7 +22,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.Inet4Address;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -43,6 +43,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import lcm.lcm.LCM;
 
@@ -59,7 +60,7 @@ public class LogPlayerComponent extends JComponent {
   private final JButton fasterButton;
   private final JButton slowerButton;
   private BigFraction speed = BigFraction.of(1, 1);
-  private final JLabel speedLabel = new JLabel(speed.toString(), JLabel.CENTER);
+  private final JLabel speedLabel = new JLabel(speed.toString(), SwingConstants.CENTER);
   private final JLabel posLabel = new JLabel("Event 0");
   private final JLabel timeLabel = new JLabel("Time 0.0s");
   private final JLabel actualSpeedLabel = new JLabel("1.0x");
@@ -380,7 +381,7 @@ public class LogPlayerComponent extends JComponent {
     @Override
     public void run() {
       DatagramPacket datagramPacket = new DatagramPacket(new byte[1024], 1024);
-      try (DatagramSocket datagramSocket = new DatagramSocket(53261, Inet4Address.getByName("127.0.0.1"))) {
+      try (DatagramSocket datagramSocket = new DatagramSocket(53261, InetAddress.getByName("127.0.0.1"))) {
         while (isLaunched) {
           try {
             datagramSocket.receive(datagramPacket);

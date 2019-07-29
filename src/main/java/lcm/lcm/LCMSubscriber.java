@@ -2,6 +2,7 @@
 package lcm.lcm;
 
 /** A class which listens for messages on a particular channel. */
+@FunctionalInterface
 public interface LCMSubscriber {
   /** Invoked by LCM when a message is received.
    *

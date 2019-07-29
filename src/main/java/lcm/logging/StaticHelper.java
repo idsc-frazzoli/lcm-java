@@ -61,6 +61,5 @@ enum StaticHelper {
     System.err.println("                         matching CHAN.");
     System.err.println("  -h, --help             Shows this help text and exits");
     System.err.println("");
-    System.exit(1);
   }
 }

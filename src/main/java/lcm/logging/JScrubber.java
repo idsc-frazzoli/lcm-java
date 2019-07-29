@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
@@ -401,8 +402,8 @@ class JScrubber extends JComponent {
     @Override
     public void mouseClicked(MouseEvent mouseEvent) {
       int mods = mouseEvent.getModifiersEx();
-      boolean shift = (mods & MouseEvent.SHIFT_DOWN_MASK) > 0;
-      boolean ctrl = (mods & MouseEvent.CTRL_DOWN_MASK) > 0;
+      boolean shift = (mods & InputEvent.SHIFT_DOWN_MASK) > 0;
+      boolean ctrl = (mods & InputEvent.CTRL_DOWN_MASK) > 0;
       boolean alt = shift & ctrl;
       ctrl = ctrl & (!alt);
       shift = shift & (!alt);
@@ -442,10 +443,10 @@ class JScrubber extends JComponent {
         inhibitGeometryChanges = true;
       else
         inhibitGeometryChanges = false;
-      if ((mouseEvent.getModifiers() & MouseEvent.BUTTON1_MASK) != 0) {
+      if ((mouseEvent.getModifiers() & InputEvent.BUTTON1_MASK) != 0) {
         userSet(position);
       }
-      if ((mouseEvent.getModifiers() & MouseEvent.BUTTON3_MASK) != 0) {
+      if ((mouseEvent.getModifiers() & InputEvent.BUTTON3_MASK) != 0) {
         if (trackbookmark != null) {
           trackbookmark.position = position;
           repaint();

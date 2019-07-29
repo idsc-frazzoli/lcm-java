@@ -21,6 +21,5 @@ enum StaticHelper {
     System.err.println("  -l, --lcm-url=URL      Use the specified LCM URL");
     System.err.println("  -h, --help             Shows this help text and exits");
     System.err.println("");
-    System.exit(1);
   }
 }

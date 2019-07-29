@@ -8,6 +8,7 @@ import lcm.lcm.LCMEncodable;
 import lcm.util.BufferedRandomAccessFile;
 
 /** A class for reading and writing LCM log files. */
+// TODO JPH implements AutoCloseable
 public class Log {
   static final int LOG_MAGIC = 0xEDA1DA01;
   // ---

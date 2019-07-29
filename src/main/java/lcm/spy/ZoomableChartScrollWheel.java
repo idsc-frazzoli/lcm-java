@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
@@ -320,7 +321,7 @@ public class ZoomableChartScrollWheel extends ZoomableChart {
   @Override
   public void mouseDragged(MouseEvent e) {
     // move the view
-    if ((e.getModifiersEx() & MouseEvent.BUTTON3_DOWN_MASK) != MouseEvent.BUTTON3_DOWN_MASK) {
+    if ((e.getModifiersEx() & InputEvent.BUTTON3_DOWN_MASK) != InputEvent.BUTTON3_DOWN_MASK) {
       dragChart(e);
     }
   }
