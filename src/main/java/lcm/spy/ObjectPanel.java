@@ -61,11 +61,7 @@ public class ObjectPanel extends JPanel {
   class Section {
     int x0, y0, x1, y1; // bounding coordinates for sensitive area
     boolean collapsed;
-    Map<String, SparklineData> sparklines;
-
-    public Section() {
-      sparklines = new HashMap<>();
-    }
+    final Map<String, SparklineData> sparklines = new HashMap<>();
   }
 
   List<Section> sections = new ArrayList<>();
@@ -260,27 +256,14 @@ public class ObjectPanel extends JPanel {
         value = (Short) o;
       else if (o instanceof Byte)
         value = (Byte) o;
-      if (collapse_depth > 0) {
-        // even if we are collapsed, we need to update the data in
-        // graphs being displayed
-        // SparklineData data = cs.sparklines.get(name);
-        // if (data.chart != null) {
-        // ITrace2D trace = data.chart.getTraces().first();
-        // if (trace.getMaxX() < utime / 1000000.0d) {
-        // // this is a new point, add it
-        // trace.addPoint(utime / 1000000.0d, value);
-        // }
-        // }
+      if (collapse_depth > 0)
         return;
-      }
       if (isstatic) {
         drawStrings(cls.getName(), name, o.toString(), isstatic);
         return;
       }
       Color oldColor = g.getColor();
-      boolean isHovering = false;
       if (currentlyHoveringSection != null && cs == currentlyHoveringSection && currentlyHoveringName.equals(name)) {
-        isHovering = true;
         g.setColor(Color.RED);
       }
       Font of = g.getFont();
@@ -295,23 +278,12 @@ public class ObjectPanel extends JPanel {
       // draw the graph
       if (!Double.isNaN(value)) {
         SparklineData data = cs.sparklines.get(name);
-        // if (data.chart == null) {
-        // data.chart = initChart(name);
-        // }
-        // Chart2D chart = data.chart;
-        // ITrace2D trace = chart.getTraces().first();
         // update the positions every loop in case another section
         // was collapsed
         data.xmin = x[3];
         data.xmax = x[3] + sparklineWidth;
         // add the data to our trace
-        // if (trace.getMaxX() < utime / 1000000.0d) {
-        // // this is a new point, add it
-        // trace.addPoint(utime / 1000000.0d, value);
-        // }
         data.lastDrawNumber = currentDrawNumber;
-        // draw the graph
-        // drawSparkline(x[3], y, trace, isHovering);
       }
       y += textheight;
       g.setFont(of);
@@ -361,7 +333,7 @@ public class ObjectPanel extends JPanel {
     this.utime = utime - chartData.getStartTime();
     JFrame topFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
     if (topFrame.getExtendedState() == Frame.ICONIFIED) {
-      // UpdateGraphDataWithoutPaint();
+      // ---
     } else {
       repaint();
     }
@@ -409,12 +381,12 @@ public class ObjectPanel extends JPanel {
 
   @Override
   public void paint(Graphics g) {
-    Graphics2D g2 = (Graphics2D) g;
-    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+    Graphics2D graphics = (Graphics2D) g;
+    graphics.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     int width = getWidth(), height = getHeight();
-    g.setColor(Color.white);
-    g.fillRect(0, 0, width, height);
-    g.setColor(Color.black);
+    graphics.setColor(Color.white);
+    graphics.fillRect(0, 0, width, height);
+    graphics.setColor(Color.black);
     FontMetrics fm = g.getFontMetrics();
     PaintState ps = new PaintState();
     ps.panel = this;

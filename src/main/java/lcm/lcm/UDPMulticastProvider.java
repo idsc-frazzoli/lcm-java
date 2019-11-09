@@ -227,7 +227,8 @@ public class UDPMulticastProvider implements Provider {
       SocketAddress socketAddress = datagramPacket.getSocketAddress();
       FragmentBuffer fragmentBuffer = fragBufs.get(socketAddress);
       // TODO arrangement of conditions not nice
-      if (fragmentBuffer != null && ((fragmentBuffer.msgSeqNumber != msgSeqNumber) || (fragmentBuffer.data_size != msg_size))) {
+      if (fragmentBuffer != null && //
+          ((fragmentBuffer.msgSeqNumber != msgSeqNumber) || (fragmentBuffer.data_size != msg_size))) {
         fragBufs.remove(fragmentBuffer.socketAddress);
         fragmentBuffer = null;
       }

@@ -357,18 +357,16 @@ public class LogPlayerComponent extends JComponent {
       if (outpath == null)
         return;
       System.out.println("Exporting to " + outpath);
-      try {
-        Log inlog = new Log(log.getPath(), "r");
-        Log outlog = new Log(outpath, "rw");
-        inlog.seekPositionFraction(p0);
-        while (inlog.getPositionFraction() < p1) {
-          Log.Event e = inlog.readNext();
-          Filter filter = filterMap.get(e.channel);
-          if (filter != null && filter.enabled)
-            outlog.write(e);
+      try (Log inlog = new Log(log.getPath(), "r")) {
+        try (Log outlog = new Log(outpath, "rw")) {
+          inlog.seekPositionFraction(p0);
+          while (inlog.getPositionFraction() < p1) {
+            Log.Event e = inlog.readNext();
+            Filter filter = filterMap.get(e.channel);
+            if (filter != null && filter.enabled)
+              outlog.write(e);
+          }
         }
-        inlog.close();
-        outlog.close();
         System.out.printf("Done!\n");
       } catch (IOException ex) {
         System.out.println("Exception: " + ex);
