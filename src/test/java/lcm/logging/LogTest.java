@@ -20,11 +20,10 @@ public class LogTest extends TestCase {
   public void testEvents() throws Exception {
     URL url = Log.class.getResource("/log/lcmlog-2017-08-24.04");
     String filename = url.getFile();
-    Log log = new Log(filename, "r");
     int count = 0;
     List<Long> range = new LinkedList<>();
     List<Integer> lengths = Arrays.asList(1206, 512);
-    try {
+    try (Log log = new Log(filename, "r")) {
       while (true) {
         Event event = log.readNext();
         range.add(event.eventNumber);

@@ -33,7 +33,7 @@ class HzThread extends Thread {
       spy.channelTableModel.fireTableDataChanged();
       if (selrow >= 0)
         spy.channelTable.setRowSelectionInterval(selrow, selrow);
-      { // TODO not the best design...
+      {
         String rate = FriendlyFormat.byteSize(spy.totalBytesRate, true);
         String total = FriendlyFormat.byteSize(spy.totalBytes, true);
         spy.jLabelInfo.setText(rate + "/s " + total);

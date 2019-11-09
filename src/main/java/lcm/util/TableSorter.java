@@ -16,6 +16,7 @@ import java.util.Map;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
@@ -418,7 +419,7 @@ public class TableSorter extends AbstractTableModel {
       Component component = tableCellRenderer.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
       if (component instanceof JLabel) {
         JLabel jLabel = (JLabel) component;
-        jLabel.setHorizontalTextPosition(JLabel.LEFT);
+        jLabel.setHorizontalTextPosition(SwingConstants.LEFT);
         int modelColumn = table.convertColumnIndexToModel(column);
         jLabel.setIcon(getHeaderRendererIcon(modelColumn, jLabel.getFont().getSize()));
       }

@@ -11,7 +11,8 @@ public enum ClassPaths {
   /** @param paths
    * @return concatenation of paths to a single class path */
   static String join(String... paths) {
-    return Stream.of(paths).filter(Objects::nonNull) //
+    return Stream.of(paths) //
+        .filter(Objects::nonNull) //
         .collect(Collectors.joining(System.getProperty("path.separator")));
   }
 

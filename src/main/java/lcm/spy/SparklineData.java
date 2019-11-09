@@ -1,7 +1,6 @@
 // code by lcm
 package lcm.spy;
 
-import info.monitorenter.gui.chart.Chart2D;
 import lcm.spy.ObjectPanel.Section;
 
 /** Data about an individual sparkline. */
@@ -9,10 +8,6 @@ class SparklineData {
   int xmin, xmax;
   int ymin, ymax;
   boolean isHovering;
-  /** all sparklines have a chart associated with them, even though
-   * we do not use it for display. This allows us to use the
-   * data-collection and management features */
-  Chart2D chart;
   String name;
   Section section;
   /** we keep track of the drawing iteration number for each line

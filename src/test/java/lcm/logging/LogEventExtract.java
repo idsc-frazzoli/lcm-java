@@ -13,9 +13,8 @@ enum LogEventExtract {
     int lo = 7481997;
     int hi = 8090113;
     // ---
-    Log log = new Log(src.toString(), "r");
     LogEventWriter logWriter = new LogEventWriter(dst);
-    try {
+    try (Log log = new Log(src.toString(), "r")) {
       while (true) {
         Event event = log.readNext();
         if (lo < event.eventNumber && event.eventNumber < hi) {

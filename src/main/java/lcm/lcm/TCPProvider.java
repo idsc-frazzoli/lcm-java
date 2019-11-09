@@ -50,7 +50,7 @@ public class TCPProvider implements Provider {
       inetPort = Integer.valueOf(addrport[1]);
     } else {
       System.err.println("TCPProvider: Don't know how to parse " + up.get("network", DEFAULT_NETWORK));
-      System.exit(-1);
+      throw new RuntimeException();
     }
     tcp = new TCPThread();
     tcp.start();

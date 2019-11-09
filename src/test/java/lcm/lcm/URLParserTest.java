@@ -13,7 +13,7 @@ public class URLParserTest extends TestCase {
         u = new URLParser(env);
       else {
         System.err.println("Must specify URL");
-        System.exit(1);
+        throw new RuntimeException();
       }
     } else {
       u = new URLParser(args[0]);

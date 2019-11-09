@@ -53,16 +53,14 @@ public class LCM {
   }
 
   /** Retrieve a default instance of LCM using either the environment variable
-   * LCM_DEFAULT_URL or the default. If an exception occurs, System.exit(-1)
-   * is called. */
+   * LCM_DEFAULT_URL or the default. */
   public static LCM getSingleton() {
     if (singleton == null) {
       try {
         singleton = new LCM();
-      } catch (Exception ex) {
-        System.err.println("LC singleton fail: " + ex);
-        System.exit(-1);
-        return null;
+      } catch (Exception exception) {
+        System.err.println("LC singleton fail: " + exception);
+        throw new RuntimeException();
       }
     }
     return singleton;
