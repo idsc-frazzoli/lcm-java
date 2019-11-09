@@ -4,7 +4,7 @@
 
 	<groupId>ch.ethz.idsc</groupId>
 	<artifactId>lcm-java</artifactId>
-	<version>0.1.0</version>
+	<version>0.1.1</version>
 	<packaging>jar</packaging>
 
 	<name>lcm-java</name>
@@ -16,11 +16,6 @@
 	</properties>
 
 	<dependencies>
-		<dependency>
-			<groupId>net.sf.jchart2d</groupId>
-			<artifactId>jchart2d</artifactId>
-			<version>3.3.2</version>
-		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

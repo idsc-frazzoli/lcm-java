@@ -1,9 +1,6 @@
 // code by lcm
 package lcm.spy;
 
-import java.util.LinkedList;
-import java.util.List;
-
 /** Global class allowing multiple charts to know about each other and make
  * intelligent decisions based on that.
  * 
@@ -18,8 +15,6 @@ public class ChartData {
   // ---
   /** start time of lcm-spy, which all X-axis are based off of */
   private long startuTime;
-  /** list of all charts displayed */
-  private final List<ZoomableChartScrollWheel> charts = new LinkedList<>();
 
   /** Constructor for ChartData. Initializes color list and sets the start time
    * of lcm-spy
@@ -28,13 +23,6 @@ public class ChartData {
    * lcm-spy start time to base each x-axis off of */
   public ChartData(long startuTime) {
     this.startuTime = startuTime;
-  }
-
-  /** Returns all charts being displayed
-   * 
-   * @return all chrats being displayed */
-  public List<ZoomableChartScrollWheel> getCharts() {
-    return charts;
   }
 
   /** Get start time in microseconds.
