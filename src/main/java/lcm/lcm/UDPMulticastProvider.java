@@ -184,6 +184,7 @@ public class UDPMulticastProvider implements Provider {
           multicastSocket.receive(datagramPacket);
           handlePacket(datagramPacket);
         } catch (IOException ex) {
+          // TODO: Should enable proper logging, but don't know how at the moment ..?
           System.err.println("ex: " + ex);
           continue;
         }
