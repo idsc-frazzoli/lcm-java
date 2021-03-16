@@ -40,7 +40,7 @@ public class LogFileProvider implements Provider {
   private boolean publishWarned = false;
 
   @Override
-  public synchronized void publish(String channel, byte data[], int offset, int length) {
+  public synchronized void publish(String channel, byte data[], int offset, int length) throws IOException {
     if (!writemode) {
       if (publishWarned)
         return;
@@ -53,11 +53,9 @@ public class LogFileProvider implements Provider {
     event.data = new byte[length];
     System.arraycopy(data, offset, event.data, 0, length);
     event.channel = channel;
-    try {
-      log.write(event);
-    } catch (IOException ex) {
-      System.err.println("ex: " + ex);
-    }
+
+    log.write(event);
+
   }
 
   @Override

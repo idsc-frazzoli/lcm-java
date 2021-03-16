@@ -56,17 +56,6 @@ public class TCPProvider implements Provider {
     tcp.start();
   }
 
-  /** Publish a message synchronously. However, if the server is not available,
-   * it will return immediately. **/
-  @Override
-  public synchronized void publish(String channel, byte data[], int offset, int length) {
-    try {
-      publishEx(channel, data, offset, length);
-    } catch (Exception ex) {
-      System.err.println("TCPProvider ex: " + ex);
-    }
-  }
-
   byte[] stringToBytes(String s) {
     try {
       return s.getBytes("US-ASCII");
@@ -115,7 +104,8 @@ public class TCPProvider implements Provider {
     }
   }
 
-  void publishEx(String channel, byte data[], int offset, int length) throws Exception {
+  @Override
+  public synchronized void publish(String channel, byte data[], int offset, int length) throws IOException {
     byte[] channel_bytes = stringToBytes(channel);
     // int payload_size = channel_bytes.length + length; // jph comment line because unused
     ByteArrayOutputStream bouts = new ByteArrayOutputStream(length + channel.length() + 32);

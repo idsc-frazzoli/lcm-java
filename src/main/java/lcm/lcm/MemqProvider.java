@@ -1,6 +1,7 @@
 // code by lcm
 package lcm.lcm;
 
+import java.io.IOException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class MemqProvider implements Provider {
@@ -21,7 +22,7 @@ public class MemqProvider implements Provider {
   }
 
   @Override
-  public void publish(String channel, byte data[], int offset, int length) {
+  public void publish(String channel, byte data[], int offset, int length) throws IOException {
     Message msg = new Message();
     msg.channel = channel;
     msg.data = new byte[length];

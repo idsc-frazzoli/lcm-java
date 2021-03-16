@@ -89,8 +89,10 @@ public class LCM {
 
   /** Publish raw data on a channel, bypassing the LCM type specification. If
    * more than one URL was specified when the LCM object was created, the
-   * message will be sent on each. **/
-  public synchronized void publish(String channel, byte[] data, int offset, int length) {
+   * message will be sent on each. 
+   * 
+   * @throws IOException in case of errors while publishing the message **/
+  public synchronized void publish(String channel, byte[] data, int offset, int length) throws IOException {
     if (closed)
       throw new IllegalStateException();
     for (Provider p : providers)

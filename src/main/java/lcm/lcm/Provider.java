@@ -1,6 +1,8 @@
 // code by lcm
 package lcm.lcm;
 
+import java.io.IOException;
+
 /** A provider implements a communications modality for LCM. (I.e., a URL
  * handler.)
  * 
@@ -9,7 +11,7 @@ package lcm.lcm;
 public interface Provider {
   /** Publish() will be called when an application sends a message, and could
    * be called on an arbitrary thread. **/
-  void publish(String channel, byte data[], int offset, int len);
+  void publish(String channel, byte data[], int offset, int len) throws IOException;
 
   /** subscribe() will be called when a channel subscription has been made.
    * Providers that do not use a broadcast communications mechanism could use

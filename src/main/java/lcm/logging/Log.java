@@ -2,6 +2,7 @@
 package lcm.logging;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import lcm.lcm.LCMDataOutputStream;
 import lcm.lcm.LCMEncodable;
@@ -122,6 +123,16 @@ public class Log implements AutoCloseable {
     LCMDataOutputStream outs = new LCMDataOutputStream();
     msg.encode(outs);
     le.data = outs.toByteArray();
+    le.eventNumber = numMessagesWritten;
+    write(le);
+    ++numMessagesWritten;
+  }
+  
+  public synchronized void write(long utime, String channel, byte[] data) throws IOException {
+    Log.Event le = new Log.Event();
+    le.utime = utime;
+    le.channel = channel;
+    le.data = Arrays.copyOf(data, data.length);
     le.eventNumber = numMessagesWritten;
     write(le);
     ++numMessagesWritten;
