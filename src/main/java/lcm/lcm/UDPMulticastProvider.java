@@ -64,15 +64,6 @@ public class UDPMulticastProvider implements Provider {
   }
 
   @Override
-  public synchronized void publish(String channel, byte data[], int offset, int length) {
-    try {
-      publishEx(channel, data, offset, length);
-    } catch (Exception ex) {
-      System.err.println("ex: " + ex);
-    }
-  }
-
-  @Override
   public synchronized void subscribe(String channel) {
     if (Objects.isNull(readerThread)) {
       readerThread = new ReaderThread();
@@ -101,7 +92,8 @@ public class UDPMulticastProvider implements Provider {
     fragBufs = null;
   }
 
-  void publishEx(String channel, byte data[], int offset, int length) throws Exception {
+  @Override
+  public synchronized void publish(String channel, byte data[], int offset, int length) throws IOException {
     byte[] channel_bytes = channel.getBytes("US-ASCII");
     int payload_size = channel_bytes.length + length;
     if (payload_size <= FRAGMENTATION_THRESHOLD) {
